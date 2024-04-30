@@ -17,7 +17,6 @@ final class User: Model, Content {
 
     init(
         id: UUID? = nil,
-        fullName: String,
         email: String,
         passwordHash: String
     ) {
