@@ -19,4 +19,3 @@ struct TokenPayload: JWTPayload {
         try expiration.verifyNotExpired()
     }
 }
-

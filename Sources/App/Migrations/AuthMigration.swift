@@ -19,7 +19,7 @@ struct AuthMigration01: AsyncMigration {
             .field("refresh_token", .string, .required)
             .field("user_id", .uuid, .required, .references("user", "id"))
             .create()
-        
+
         // TODO: check alternatives to this
         try await (database as! SQLDatabase)
             .create(index: "refresh_token_index")
@@ -33,4 +33,3 @@ struct AuthMigration01: AsyncMigration {
         try await database.schema("user").delete()
     }
 }
-

@@ -14,13 +14,12 @@ let REFRESH_TOKEN_EXPIRATION: TimeInterval = 60 * 60 * 24 // 1d
 // TODO: this class should not throw HTTP errors, instead Auth errors
 
 class Auth {
-    
     private let request: Request
-    
-    init(_ request: Request){
+
+    init(_ request: Request) {
         self.request = request
     }
-    
+
     func register(email: String, password: String) async throws {
         let user = try User(
             email: email,
@@ -36,28 +35,30 @@ class Auth {
             throw error
         }
     }
-    
-    func authenticate(_ email: String, _ password: String) async throws -> Tokens {
+
+    func authenticate(_ email: String,
+                      _ password: String) async throws -> Tokens
+    {
         let user = try await User.query(on: request.db)
             .filter(\.$email == email)
             .first()
-        
-        guard let user = user else {
+
+        guard let user else {
             throw Abort(.badRequest, reason: "not valid email")
         }
-        
+
         let sameHash = try Bcrypt.verify(password, created: user.passwordHash)
-        
+
         guard sameHash else {
             throw Abort(.badRequest, reason: "invalid credentials")
         }
-        
+
         let accessToken = try createAccessToken(user)
         let refreshToken = try createRefreshToken(user)
         try await storeRefreshToken(refreshToken, userId: user.requireID())
         return Tokens(accessToken: accessToken, refreshToken: refreshToken)
     }
-    
+
     func getNewAccessToken(refreshToken: String) async throws -> String {
         let foundSession = try await Session.query(on: request.db)
             .with(\.$user)
@@ -68,14 +69,17 @@ class Auth {
             // TODO: replace this error with one not related to a controller
             throw Abort(.badRequest, reason: "Not valid token")
         }
-        
+
         let accessToken = try createAccessToken(session.user)
-        
+
         return accessToken
     }
-    
+
     private func createAccessToken(_ user: User) throws -> String {
-        let payload = TokenPayload(user: user, duration: ACCESS_TOKEN_EXPIRATION)
+        let payload = TokenPayload(
+            user: user,
+            duration: ACCESS_TOKEN_EXPIRATION
+        )
         let token = try request.jwt.sign(payload)
         return token
     }
@@ -88,7 +92,7 @@ class Auth {
         let refreshToken = try request.jwt.sign(refreshPayload, kid: "refresh")
         return refreshToken
     }
-    
+
     private func storeRefreshToken(
         _ refreshToken: String,
         userId: User.IDValue
@@ -96,5 +100,4 @@ class Auth {
         let session = Session(refreshToken: refreshToken, userID: userId)
         try await session.save(on: request.db)
     }
-    
 }

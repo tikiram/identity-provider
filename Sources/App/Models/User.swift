@@ -28,7 +28,6 @@ final class User: Model, Content {
 
 // TODO: move this to other place?
 extension User: ModelAuthenticatable {
-
     static let usernameKey = \User.$email
     static let passwordHashKey = \User.$passwordHash
 
