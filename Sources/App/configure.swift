@@ -21,17 +21,10 @@ public func configure(_ app: Application) async throws {
     app.jwt.signers.use(.hs256(key: SECRET_KEY), kid: "secret", isDefault: true)
     app.jwt.signers.use(.hs256(key: REFRESH_KEY), kid: "refresh")
 
+    let DATABASE_URL = Environment.get("DATABASE_URL")!
+
     try app.databases.use(
-        DatabaseConfigurationFactory.postgres(configuration: .init(
-            hostname: Environment.get("DATABASE_HOST") ?? "localhost",
-            port: Environment.get("DATABASE_PORT")
-                .flatMap(Int.init(_:)) ?? SQLPostgresConfiguration
-                .ianaPortNumber,
-            username: Environment.get("DATABASE_USERNAME") ?? "vapor_username",
-            password: Environment.get("DATABASE_PASSWORD") ?? "vapor_password",
-            database: Environment.get("DATABASE_NAME") ?? "vapor_database",
-            tls: .prefer(.init(configuration: .clientDefault))
-        )),
+        DatabaseConfigurationFactory.postgres(url: DATABASE_URL),
         as: .psql
     )
 
