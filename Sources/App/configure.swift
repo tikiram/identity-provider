@@ -18,8 +18,8 @@ public func configure(_ app: Application) async throws {
     ContentConfiguration.global.use(encoder: encoder, for: .json)
 
     // settign the JWT keys
-    //app.jwt.signers.use(.hs256(key: SECRET_KEY), kid: "secret", isDefault: true)
-    //app.jwt.signers.use(.hs256(key: REFRESH_KEY), kid: "refresh")
+    app.jwt.signers.use(.hs256(key: SECRET_KEY), kid: "secret", isDefault: true)
+    app.jwt.signers.use(.hs256(key: REFRESH_KEY), kid: "refresh")
 
     app.databases.use(DatabaseConfigurationFactory.postgres(configuration: .init(
         hostname: Environment.get("DATABASE_HOST") ?? "localhost",

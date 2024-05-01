@@ -3,11 +3,6 @@ import Fluent
 import PostgresNIO
 import Vapor
 
-struct SignUpPayload: Content {
-    let email: String
-    let password: String
-}
-
 struct Tokens {
     let accessToken: String
     let refreshToken: String
@@ -26,10 +21,10 @@ class Auth {
         self.request = request
     }
     
-    func register(_ payload: SignUpPayload) async throws {
+    func register(email: String, password: String) async throws {
         let user = try User(
-            email: payload.email,
-            passwordHash: Bcrypt.hash(payload.password)
+            email: email,
+            passwordHash: Bcrypt.hash(password)
         )
 
         do {

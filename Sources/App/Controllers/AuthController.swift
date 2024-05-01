@@ -16,6 +16,11 @@ struct TokensResponse: Content {
     let expires_in: Double?
 }
 
+struct SignUpPayload: Content {
+    let username: String
+    let password: String
+}
+
 struct AuthControler: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let router = routes.grouped("auth")
@@ -24,13 +29,11 @@ struct AuthControler: RouteCollection {
         router.post("token", use: token)
     }
 
-
-
     func register(req: Request) async throws -> HTTPStatus {
         // try SignUpPayload.validate(content: req)
         let payload = try req.content.decode(SignUpPayload.self)
 
-        try await Auth(req).register(payload)
+        try await Auth(req).register(email: payload.username, password: payload.password)
         
         return .noContent
     }
