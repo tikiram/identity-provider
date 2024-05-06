@@ -21,16 +21,24 @@ public func configure(_ app: Application) async throws {
     app.jwt.signers.use(.hs256(key: SECRET_KEY), kid: "secret", isDefault: true)
     app.jwt.signers.use(.hs256(key: REFRESH_KEY), kid: "refresh")
 
-    let databaseURL = Environment.get("DATABASE_URL")!
+    let DATABASE_URL = Environment.get("DATABASE_URL")!
 
-    var tlsConfig: TLSConfiguration = .makeClientConfiguration()
-    tlsConfig.certificateVerification = .none
-    let nioSSLContext = try NIOSSLContext(configuration: tlsConfig)
+    if app.environment == .production {
+        var tlsConfig: TLSConfiguration = .makeClientConfiguration()
+        tlsConfig.certificateVerification = .none
+        let nioSSLContext = try NIOSSLContext(configuration: tlsConfig)
 
-    var postgresConfig = try SQLPostgresConfiguration(url: databaseURL)
-    postgresConfig.coreConfiguration.tls = .require(nioSSLContext)
+        var postgresConfig = try SQLPostgresConfiguration(url: DATABASE_URL)
+        postgresConfig.coreConfiguration.tls = .require(nioSSLContext)
 
-    app.databases.use(.postgres(configuration: postgresConfig), as: .psql)
+        app.databases.use(.postgres(configuration: postgresConfig), as: .psql)
+    }
+    else {
+        try app.databases.use(
+            DatabaseConfigurationFactory.postgres(url: DATABASE_URL),
+            as: .psql
+        )
+    }
 
     // This can be used to see the generated SQL sentences
     // app.logger.logLevel = .debug

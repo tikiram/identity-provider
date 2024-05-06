@@ -38,15 +38,16 @@ struct AuthControler: RouteCollection {
 
         return .noContent
     }
-
-    func token(req: Request) async throws -> TokensResponse {
+    
+    
+    private func tokenHandler(_ req: Request) async throws -> TokensResponse {
         let payload = try req.content.decode(TokensPayload.self)
 
         if payload.grand_type == "password" {
             guard let email = payload.username,
                   let password = payload.password
             else {
-                throw Abort(.badRequest, reason: "email and password required")
+                throw Abort(.badRequest, reason: "EMAIL_AND_PASSWORD_REQUIRED")
             }
 
             let tokens = try await Auth(req).authenticate(email, password)
@@ -60,7 +61,7 @@ struct AuthControler: RouteCollection {
 
         if payload.grand_type == "refresh_token" {
             guard let refreshToken = payload.refresh_token else {
-                throw Abort(.badRequest, reason: "refresh_token required")
+                throw Abort(.badRequest, reason: "REFRESH_TOKEN_REQUIRED")
             }
 
             let accessToken = try await Auth(req)
@@ -71,7 +72,25 @@ struct AuthControler: RouteCollection {
                 expires_in: ACCESS_TOKEN_EXPIRATION
             )
         }
-
+        
         throw Abort(.badRequest, reason: "Not supported")
+    }
+    
+
+    func token(req: Request) async throws -> TokensResponse {
+
+        do {
+            return try await tokenHandler(req)
+        }
+        catch let error as AuthError {
+            switch error {
+            case .emailAlreadyUsed:
+                throw Abort(.badRequest, reason: "EMAIL_ALREADY_USED")
+            case .invalidCredentials:
+                throw Abort(.badRequest, reason: "INVALID_CREDENTIALS")
+            case .notValidToken:
+                throw Abort(.badRequest, reason: "NOT_VALID_TOKEN")
+            }
+        }
     }
 }

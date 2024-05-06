@@ -11,7 +11,11 @@ struct Tokens {
 let ACCESS_TOKEN_EXPIRATION: TimeInterval = 60 * 60 // 1h
 let REFRESH_TOKEN_EXPIRATION: TimeInterval = 60 * 60 * 24 // 1d
 
-// TODO: this class should not throw HTTP errors, instead Auth errors
+enum AuthError: Error {
+    case notValidToken
+    case emailAlreadyUsed
+    case invalidCredentials
+}
 
 class Auth {
     private let request: Request
@@ -30,7 +34,7 @@ class Auth {
             try await user.save(on: request.db)
         } catch let error as PSQLError {
             if error.isConstraintFailure {
-                throw Abort(.badRequest, reason: "EMAIL_ALREADY_USED")
+                throw AuthError.emailAlreadyUsed
             }
             throw error
         }
@@ -44,13 +48,13 @@ class Auth {
             .first()
 
         guard let user else {
-            throw Abort(.badRequest, reason: "not valid email")
+            throw AuthError.invalidCredentials
         }
 
         let sameHash = try Bcrypt.verify(password, created: user.passwordHash)
 
         guard sameHash else {
-            throw Abort(.badRequest, reason: "invalid credentials")
+            throw AuthError.invalidCredentials
         }
 
         let accessToken = try createAccessToken(user)
@@ -64,10 +68,11 @@ class Auth {
             .with(\.$user)
             .filter(\.$refreshToken == refreshToken)
             .first()
+        
+        // TODO: validate token is not expired
 
         guard let session = foundSession else {
-            // TODO: replace this error with one not related to a controller
-            throw Abort(.badRequest, reason: "Not valid token")
+            throw AuthError.notValidToken
         }
 
         let accessToken = try createAccessToken(session.user)
