@@ -32,8 +32,7 @@ public func configure(_ app: Application) async throws {
         postgresConfig.coreConfiguration.tls = .require(nioSSLContext)
 
         app.databases.use(.postgres(configuration: postgresConfig), as: .psql)
-    }
-    else {
+    } else {
         try app.databases.use(
             DatabaseConfigurationFactory.postgres(url: DATABASE_URL),
             as: .psql

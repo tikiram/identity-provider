@@ -38,8 +38,7 @@ struct AuthControler: RouteCollection {
 
         return .noContent
     }
-    
-    
+
     private func tokenHandler(_ req: Request) async throws -> TokensResponse {
         let payload = try req.content.decode(TokensPayload.self)
 
@@ -72,17 +71,14 @@ struct AuthControler: RouteCollection {
                 expires_in: ACCESS_TOKEN_EXPIRATION
             )
         }
-        
+
         throw Abort(.badRequest, reason: "Not supported")
     }
-    
 
     func token(req: Request) async throws -> TokensResponse {
-
         do {
             return try await tokenHandler(req)
-        }
-        catch let error as AuthError {
+        } catch let error as AuthError {
             switch error {
             case .emailAlreadyUsed:
                 throw Abort(.badRequest, reason: "EMAIL_ALREADY_USED")

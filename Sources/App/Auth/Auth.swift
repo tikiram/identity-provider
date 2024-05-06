@@ -68,7 +68,7 @@ class Auth {
             .with(\.$user)
             .filter(\.$refreshToken == refreshToken)
             .first()
-        
+
         // TODO: validate token is not expired
 
         guard let session = foundSession else {
