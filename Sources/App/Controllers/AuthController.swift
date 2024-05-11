@@ -31,12 +31,15 @@ struct AuthControler: RouteCollection {
         // try SignUpPayload.validate(content: req)
         let payload = try req.content.decode(SignUpPayload.self)
 
-        try await Auth(req).register(
-            email: payload.username,
-            password: payload.password
-        )
-
-        return .noContent
+        do {
+            try await Auth(req).register(
+                email: payload.username,
+                password: payload.password
+            )
+            return .noContent
+        } catch AuthError.emailAlreadyUsed {
+            throw Abort(.badRequest, reason: "EMAIL_ALREADY_USED")
+        }
     }
 
     private func tokenHandler(_ req: Request) async throws -> TokensResponse {
