@@ -1,7 +1,7 @@
 import Fluent
 import Vapor
 
-final class Session: Model, Content {
+final class Session: Model, @unchecked Sendable {
     static let schema = "session"
 
     @ID(key: .id)

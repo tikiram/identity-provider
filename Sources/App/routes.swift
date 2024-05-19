@@ -11,4 +11,15 @@ func routes(_ app: Application) throws {
     }
 
     try app.register(collection: AuthControler())
+
+    let secure = app
+        .grouped(
+            TokenPayload.authenticator(),
+            TokenPayload.guardMiddleware()
+        )
+
+    secure.get("info") { req -> TokenPayload in
+        let payload = try req.auth.require(TokenPayload.self)
+        return payload
+    }
 }
