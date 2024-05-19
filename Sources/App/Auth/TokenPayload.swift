@@ -3,11 +3,16 @@ import JWT
 import Vapor
 
 struct TokenPayload: JWTPayload {
-    var subject: SubjectClaim
+    let subject: SubjectClaim
     let expiration: ExpirationClaim
 
     var userId: UUID {
         UUID(uuidString: subject.value)!
+    }
+    
+    enum CodingKeys: String, CodingKey {
+        case subject = "sub"
+        case expiration = "exp"
     }
 
     init(user: User, duration: TimeInterval) {
