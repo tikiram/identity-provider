@@ -7,47 +7,47 @@ let SECRET_KEY = Environment.get("SECRET_KEY")!
 let REFRESH_KEY = Environment.get("REFRESH_KEY")!
 
 public func configure(_ app: Application) async throws {
-    // uncomment to serve files from /Public folder
-    // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
+  // uncomment to serve files from /Public folder
+  // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
 
-    // For some reason decode and encode strategy are different for the Date
-    // type
-    // with this configuration both have the same strategy
-    let encoder = JSONEncoder()
-    encoder.dateEncodingStrategy = .millisecondsSince1970
-    ContentConfiguration.global.use(encoder: encoder, for: .json)
+  // For some reason decode and encode strategy are different for the Date
+  // type
+  // with this configuration both have the same strategy
+  let encoder = JSONEncoder()
+  encoder.dateEncodingStrategy = .millisecondsSince1970
+  ContentConfiguration.global.use(encoder: encoder, for: .json)
 
-    // settign the JWT keys
-    app.jwt.signers.use(.hs256(key: SECRET_KEY), kid: "secret", isDefault: true)
-    app.jwt.signers.use(.hs256(key: REFRESH_KEY), kid: "refresh")
+  // settign the JWT keys
+  app.jwt.signers.use(.hs256(key: SECRET_KEY), kid: "secret", isDefault: true)
+  app.jwt.signers.use(.hs256(key: REFRESH_KEY), kid: "refresh")
 
-    let DATABASE_URL = Environment.get("DATABASE_URL")!
+  let DATABASE_URL = Environment.get("DATABASE_URL")!
 
-    if app.environment == .production {
-        var tlsConfig: TLSConfiguration = .makeClientConfiguration()
-        tlsConfig.certificateVerification = .none
-        let nioSSLContext = try NIOSSLContext(configuration: tlsConfig)
+  if app.environment == .production {
+    var tlsConfig: TLSConfiguration = .makeClientConfiguration()
+    tlsConfig.certificateVerification = .none
+    let nioSSLContext = try NIOSSLContext(configuration: tlsConfig)
 
-        var postgresConfig = try SQLPostgresConfiguration(url: DATABASE_URL)
-        postgresConfig.coreConfiguration.tls = .require(nioSSLContext)
+    var postgresConfig = try SQLPostgresConfiguration(url: DATABASE_URL)
+    postgresConfig.coreConfiguration.tls = .require(nioSSLContext)
 
-        app.databases.use(.postgres(configuration: postgresConfig), as: .psql)
-    } else {
-        try app.databases.use(
-            DatabaseConfigurationFactory.postgres(url: DATABASE_URL),
-            as: .psql
-        )
-    }
+    app.databases.use(.postgres(configuration: postgresConfig), as: .psql)
+  } else {
+    try app.databases.use(
+      DatabaseConfigurationFactory.postgres(url: DATABASE_URL),
+      as: .psql
+    )
+  }
 
-    // This can be used to see the generated SQL sentences
-    // app.logger.logLevel = .debug
+  // This can be used to see the generated SQL sentences
+  // app.logger.logLevel = .debug
 
-    app.migrations.add(AuthMigration01())
+  app.migrations.add(AuthMigration01())
 
-    if app.environment == .production {
-        try await app.autoMigrate()
-    }
+  if app.environment == .production {
+    try await app.autoMigrate()
+  }
 
-    // register routes
-    try routes(app)
+  // register routes
+  try routes(app)
 }
