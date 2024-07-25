@@ -87,7 +87,7 @@ struct AuthControler: RouteCollection {
       case .invalidCredentials:
         throw Abort(.badRequest, reason: "INVALID_CREDENTIALS")
       case .notValidToken:
-        throw Abort(.badRequest, reason: "NOT_VALID_TOKEN")
+        throw Abort(.unauthorized, reason: "INVALID_TOKEN")
       }
     }
   }
