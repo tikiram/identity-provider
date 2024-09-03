@@ -7,9 +7,6 @@ struct Tokens {
   let refreshToken: String
 }
 
-let ACCESS_TOKEN_EXPIRATION: TimeInterval = 60 * 60  // 1h
-let REFRESH_TOKEN_EXPIRATION: TimeInterval = 60 * 60 * 24  // 1d
-
 enum AuthError: Error {
   case notValidToken
   case emailAlreadyUsed
@@ -17,33 +14,34 @@ enum AuthError: Error {
 }
 
 class Auth {
-  private let request: Request
+  static let accessTokenExpirationTime: TimeInterval = 60 * 60 // 1h
+  static let refreshTokenExpirationTime: TimeInterval = 60 * 60 * 24 // 1d
+  
+  private let database: Database
+  private let jwt: Request.JWT
 
-  init(_ request: Request) {
-    self.request = request
+  init(database: Database, jwt: Request.JWT) {
+    self.database = database
+    self.jwt = jwt
   }
 
-  func register(email: String, password: String) async throws {
+  func register(email: String, password: String) async throws -> Tokens {
     let user = try User(
       email: email,
       passwordHash: Bcrypt.hash(password)
     )
 
     do {
-      try await user.save(on: request.db)
-    } catch let error as PSQLError {
-      if error.isConstraintFailure {
-        throw AuthError.emailAlreadyUsed
-      }
-      throw error
+      try await user.save(on: database)
+    } catch let error as PSQLError where error.isConstraintFailure {
+      throw AuthError.emailAlreadyUsed
     }
+    
+    return try await createTokens(of: user)
   }
 
-  func authenticate(
-    _ email: String,
-    _ password: String
-  ) async throws -> Tokens {
-    let user = try await User.query(on: request.db)
+  func authenticate(email: String, password: String) async throws -> Tokens {
+    let user = try await User.query(on: database)
       .filter(\.$email == email)
       .first()
 
@@ -56,15 +54,19 @@ class Auth {
     guard sameHash else {
       throw AuthError.invalidCredentials
     }
-
-    let accessToken = try createAccessToken(user)
-    let refreshToken = try createRefreshToken(user)
+    
+    return try await createTokens(of: user)
+  }
+  
+  private func createTokens(of user: User) async throws -> Tokens {
+    let accessToken = try createAccessToken(of: user)
+    let refreshToken = try createRefreshToken(of: user)
     try await storeRefreshToken(refreshToken, userId: user.requireID())
     return Tokens(accessToken: accessToken, refreshToken: refreshToken)
   }
 
   func getNewAccessToken(refreshToken: String) async throws -> String {
-    let foundSession = try await Session.query(on: request.db)
+    let foundSession = try await Session.query(on: database)
       .with(\.$user)
       .filter(\.$refreshToken == refreshToken)
       .first()
@@ -75,26 +77,26 @@ class Auth {
       throw AuthError.notValidToken
     }
 
-    let accessToken = try createAccessToken(session.user)
+    let accessToken = try createAccessToken(of: session.user)
 
     return accessToken
   }
 
-  private func createAccessToken(_ user: User) throws -> String {
+  private func createAccessToken(of user: User) throws -> String {
     let payload = TokenPayload(
       user: user,
-      duration: ACCESS_TOKEN_EXPIRATION
+      duration: Self.accessTokenExpirationTime
     )
-    let token = try request.jwt.sign(payload)
+    let token = try jwt.sign(payload)
     return token
   }
 
-  private func createRefreshToken(_ user: User) throws -> String {
+  private func createRefreshToken(of user: User) throws -> String {
     let refreshPayload = TokenPayload(
       user: user,
-      duration: REFRESH_TOKEN_EXPIRATION
+      duration: Self.refreshTokenExpirationTime
     )
-    let refreshToken = try request.jwt.sign(refreshPayload, kid: "refresh")
+    let refreshToken = try jwt.sign(refreshPayload, kid: "refresh")
     return refreshToken
   }
 
@@ -103,6 +105,6 @@ class Auth {
     userId: User.IDValue
   ) async throws {
     let session = Session(refreshToken: refreshToken, userID: userId)
-    try await session.save(on: request.db)
+    try await session.save(on: database)
   }
 }

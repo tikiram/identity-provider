@@ -3,25 +3,43 @@ import FluentPostgresDriver
 import NIOSSL
 import Vapor
 
-let SECRET_KEY = Environment.get("SECRET_KEY")!
-let REFRESH_KEY = Environment.get("REFRESH_KEY")!
+let SECRET_KEY = Environment.get("SECRET_KEY")
+let REFRESH_KEY = Environment.get("REFRESH_KEY")
+let DATABASE_URL = Environment.get("DATABASE_URL")
+
+enum EnvironmentValueError: Error {
+  case undefined(String)
+}
 
 public func configure(_ app: Application) async throws {
+  guard let SECRET_KEY else {
+    throw EnvironmentValueError.undefined("SECRET_KEY")
+  }
+  guard let REFRESH_KEY else {
+    throw EnvironmentValueError.undefined("REFRESH_KEY")
+  }
+  guard let DATABASE_URL else {
+    throw EnvironmentValueError.undefined("DATABASE_URL")
+  }
+  
   // uncomment to serve files from /Public folder
   // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
 
   // For some reason decode and encode strategy are different for the Date
-  // type
-  // with this configuration both have the same strategy
+  // type with this configuration both have the same strategy
   let encoder = JSONEncoder()
   encoder.dateEncodingStrategy = .millisecondsSince1970
+  encoder.keyEncodingStrategy = .convertToSnakeCase
   ContentConfiguration.global.use(encoder: encoder, for: .json)
+  
+  let decoder = JSONDecoder()
+  decoder.dateDecodingStrategy = .millisecondsSince1970
+  decoder.keyDecodingStrategy = .convertFromSnakeCase
+  ContentConfiguration.global.use(decoder: decoder, for: .json)
 
   // settign the JWT keys
   app.jwt.signers.use(.hs256(key: SECRET_KEY), kid: "secret", isDefault: true)
   app.jwt.signers.use(.hs256(key: REFRESH_KEY), kid: "refresh")
-
-  let DATABASE_URL = Environment.get("DATABASE_URL")!
 
   if app.environment == .production {
     var tlsConfig: TLSConfiguration = .makeClientConfiguration()
