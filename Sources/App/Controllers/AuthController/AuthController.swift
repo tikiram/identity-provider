@@ -17,10 +17,10 @@ struct AuthControler: RouteCollection {
         email: payload.username,
         password: payload.password
       )
-    
+
     return TokensResponse(tokens: tokens, expiresIn: Auth.accessTokenExpirationTime)
   }
-  
+
   private func tokenHandler(_ req: Request) async throws -> TokensResponse {
     try TokensPayload.validate(content: req)
     let tokensPayload = try req.content.decode(TokensPayload.self)
@@ -31,7 +31,7 @@ struct AuthControler: RouteCollection {
       return try await refreshTokenGrandTypeHandler(req)
     }
   }
-  
+
   private func passwordGrandTypeHandler(_ req: Request) async throws -> TokensResponse {
     try PasswordGrandTypePayload.validate(content: req)
     let payload = try req.content.decode(PasswordGrandTypePayload.self)
@@ -41,14 +41,14 @@ struct AuthControler: RouteCollection {
 
     return TokensResponse(tokens: tokens, expiresIn: Auth.accessTokenExpirationTime)
   }
-  
+
   private func refreshTokenGrandTypeHandler(_ req: Request) async throws -> TokensResponse {
     try RefreshTokenGrandTypePayload.validate(content: req)
     let payload = try req.content.decode(RefreshTokenGrandTypePayload.self)
 
     let accessToken = try await Auth(database: req.db, jwt: req.jwt)
       .getNewAccessToken(refreshToken: payload.refreshToken)
-    
+
     return TokensResponse(
       accessToken: accessToken,
       expiresIn: Auth.accessTokenExpirationTime

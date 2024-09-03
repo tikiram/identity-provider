@@ -1,4 +1,3 @@
-
 import Vapor
 
 enum GrandType: String, Codable {
@@ -8,7 +7,7 @@ enum GrandType: String, Codable {
 
 struct TokensPayload: Content, Validatable {
   let grandType: GrandType
-  
+
   static func validations(_ validations: inout Vapor.Validations) {
     validations.add("grandType", as: String.self, is: .in("password", "refresh_token"))
   }
@@ -19,7 +18,7 @@ struct PasswordGrandTypePayload: Content, Validatable {
   // TODO: username is actually `email`, check what is the standard
   let username: String
   let password: String
-  
+
   static func validations(_ validations: inout Vapor.Validations) {
     validations.add("username", as: String.self, is: .email)
     validations.add("password", as: String.self, is: !.empty)
@@ -28,7 +27,7 @@ struct PasswordGrandTypePayload: Content, Validatable {
 
 struct RefreshTokenGrandTypePayload: Content, Validatable {
   let refreshToken: String
-  
+
   static func validations(_ validations: inout Vapor.Validations) {
     validations.add("refreshToken", as: String.self, is: !.empty)
   }

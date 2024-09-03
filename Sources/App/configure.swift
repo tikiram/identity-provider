@@ -21,10 +21,10 @@ public func configure(_ app: Application) async throws {
   guard let DATABASE_URL else {
     throw EnvironmentValueError.undefined("DATABASE_URL")
   }
-  
+
   // uncomment to serve files from /Public folder
   // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
-  
+
   app.middleware.use(RepoErrorMiddleware())
 
   // For some reason decode and encode strategy are different for the Date
@@ -33,7 +33,7 @@ public func configure(_ app: Application) async throws {
   encoder.dateEncodingStrategy = .millisecondsSince1970
   encoder.keyEncodingStrategy = .convertToSnakeCase
   ContentConfiguration.global.use(encoder: encoder, for: .json)
-  
+
   let decoder = JSONDecoder()
   decoder.dateDecodingStrategy = .millisecondsSince1970
   decoder.keyDecodingStrategy = .convertFromSnakeCase

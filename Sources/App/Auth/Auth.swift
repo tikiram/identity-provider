@@ -14,9 +14,9 @@ enum AuthError: Error {
 }
 
 class Auth {
-  static let accessTokenExpirationTime: TimeInterval = 60 * 60 // 1h
-  static let refreshTokenExpirationTime: TimeInterval = 60 * 60 * 24 // 1d
-  
+  static let accessTokenExpirationTime: TimeInterval = 60 * 60  // 1h
+  static let refreshTokenExpirationTime: TimeInterval = 60 * 60 * 24  // 1d
+
   private let database: Database
   private let jwt: Request.JWT
 
@@ -36,7 +36,7 @@ class Auth {
     } catch let error as PSQLError where error.isConstraintFailure {
       throw AuthError.emailAlreadyUsed
     }
-    
+
     return try await createTokens(of: user)
   }
 
@@ -54,10 +54,10 @@ class Auth {
     guard sameHash else {
       throw AuthError.invalidCredentials
     }
-    
+
     return try await createTokens(of: user)
   }
-  
+
   private func createTokens(of user: User) async throws -> Tokens {
     let accessToken = try createAccessToken(of: user)
     let refreshToken = try createRefreshToken(of: user)
