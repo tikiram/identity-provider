@@ -22,19 +22,18 @@ struct AuthControler: RouteCollection {
   }
   
   private func tokenHandler(_ req: Request) async throws -> TokensResponse {
-    // TODO: validate payload
+    try TokensPayload.validate(content: req)
     let tokensPayload = try req.content.decode(TokensPayload.self)
     switch tokensPayload.grandType {
-    case "password":
+    case .password:
       return try await passwordGrandTypeHandler(req)
-    case "refresh_token":
+    case .refreshToken:
       return try await refreshTokenGrandTypeHandler(req)
-    default:
-      throw Abort(.badRequest, reason: "Not supported")
     }
   }
   
   private func passwordGrandTypeHandler(_ req: Request) async throws -> TokensResponse {
+    try PasswordGrandTypePayload.validate(content: req)
     let payload = try req.content.decode(PasswordGrandTypePayload.self)
 
     let tokens = try await Auth(database: req.db, jwt: req.jwt)
@@ -44,7 +43,7 @@ struct AuthControler: RouteCollection {
   }
   
   private func refreshTokenGrandTypeHandler(_ req: Request) async throws -> TokensResponse {
-    // TODO: validate payload
+    try RefreshTokenGrandTypePayload.validate(content: req)
     let payload = try req.content.decode(RefreshTokenGrandTypePayload.self)
 
     let accessToken = try await Auth(database: req.db, jwt: req.jwt)
@@ -55,20 +54,4 @@ struct AuthControler: RouteCollection {
       expiresIn: Auth.accessTokenExpirationTime
     )
   }
-
-  // TODO: create a middleware to handle these errors
-//  func token(req: Request) async throws -> TokensResponse {
-//    do {
-//      return try await tokenHandler(req)
-//    } catch let error as AuthError {
-//      switch error {
-//      case .emailAlreadyUsed:
-//        throw Abort(.badRequest, reason: "EMAIL_ALREADY_USED")
-//      case .invalidCredentials:
-//        throw Abort(.badRequest, reason: "INVALID_CREDENTIALS")
-//      case .notValidToken:
-//        throw Abort(.unauthorized, reason: "INVALID_TOKEN")
-//      }
-//    }
-//  }
 }

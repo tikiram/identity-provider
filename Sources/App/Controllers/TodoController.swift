@@ -1,11 +1,13 @@
 import Fluent
 import Vapor
 
+// TODO: delete this file
+
 struct TodoController: RouteCollection {
   func boot(routes: RoutesBuilder) throws {
     let todos = routes.grouped("todos")
 
-    todos.put(use: index)
+    todos.put(use: { try await index(req: $0) })
     todos.get(use: { try await index(req: $0) })
     todos.post(use: { try await create(req: $0) })
     todos.group(":todoID") { todo in

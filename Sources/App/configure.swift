@@ -24,6 +24,8 @@ public func configure(_ app: Application) async throws {
   
   // uncomment to serve files from /Public folder
   // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
+  
+  app.middleware.use(RepoErrorMiddleware())
 
   // For some reason decode and encode strategy are different for the Date
   // type with this configuration both have the same strategy

@@ -2,7 +2,6 @@
 import Vapor
 
 struct SignUpPayload: Content, Validatable {
-  
   // TODO: username is actually `email`, check what is the standard
   let username: String
   let password: String
