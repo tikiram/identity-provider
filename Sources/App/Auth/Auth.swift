@@ -1,5 +1,6 @@
 import Fluent
 import PostgresNIO
+import JWTKit
 import Vapor
 
 struct Tokens {
@@ -66,15 +67,25 @@ class Auth {
   }
 
   func getNewAccessToken(refreshToken: String) async throws -> String {
-    let foundSession = try await Session.query(on: database)
+    
+    // TODO: check these suggestions
+    // https://stackoverflow.com/questions/59511628/is-it-secure-to-store-a-refresh-token-in-the-database-to-issue-new-access-toke
+    
+    let session = try await Session.query(on: database)
       .with(\.$user)
       .filter(\.$refreshToken == refreshToken)
       .first()
-
-    // TODO: validate token is not expired
-
-    guard let session = foundSession else {
+    
+    guard let session else {
       throw AuthError.notValidToken
+    }
+    
+    do {
+      let _ = try jwt.verify(refreshToken, as: TokenPayload.self)
+    }
+    catch let error as JWTError {
+      try await session.delete(on: database)
+      throw error
     }
 
     let accessToken = try createAccessToken(of: session.user)
