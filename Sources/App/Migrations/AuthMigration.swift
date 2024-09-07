@@ -21,6 +21,7 @@ struct AuthMigration01: AsyncMigration {
       .create()
 
     // TODO: check alternatives to this
+    // TODO: probably with a unique constrains adding this index will not be necessary
     try await (database as! SQLDatabase)
       .create(index: "refresh_token_index")
       .on("session")

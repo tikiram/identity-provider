@@ -71,6 +71,8 @@ class Auth {
     // TODO: check these suggestions
     // https://stackoverflow.com/questions/59511628/is-it-secure-to-store-a-refresh-token-in-the-database-to-issue-new-access-toke
     
+    // TODO: check indexes on Session table
+    
     let session = try await Session.query(on: database)
       .with(\.$user)
       .filter(\.$refreshToken == refreshToken)
