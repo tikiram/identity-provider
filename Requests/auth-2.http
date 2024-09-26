@@ -1,0 +1,53 @@
+GET {{host}}
+Accept: application/json
+
+### Register
+
+POST {{host}}/auth/register
+Content-Type: application/json
+
+{
+  "username": "test6@test.com",
+  "password": "test"
+}
+
+> {%
+    client.global.set("access_token", response.body.access_token);
+    client.global.set("refresh_token", response.body.refresh_token);
+%}
+
+### Login
+
+POST {{host}}/auth/token
+Content-Type: application/json
+
+{
+  "username": "test6@test.com",
+  "password": "test",
+  "grand_type": "password"
+}
+
+> {%
+  client.global.set("access_token", response.body.access_token);
+  client.global.set("refresh_token", response.body.refresh_token);
+%}
+
+### refresh token
+
+POST {{host}}/auth/token
+Content-Type: application/json
+
+{
+  "refresh_token": "{{refresh_token}}",
+  "grand_type": "refresh_token"
+}
+
+> {%
+  client.global.set("access_token", response.body.access_token);
+%}
+
+###
+
+GET {{host}}/info
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
