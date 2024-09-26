@@ -8,16 +8,16 @@ let package = Package(
     ],
     dependencies: [
         // 💧 A server-side Swift web framework.
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.92.4"),
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.105.0"),
         // 🗄 An ORM for SQL and NoSQL databases.
-        .package(url: "https://github.com/vapor/fluent.git", from: "4.9.0"),
+        .package(url: "https://github.com/vapor/fluent.git", from: "4.11.0"),
         // 🐘 Fluent driver for Postgres.
         .package(
             url: "https://github.com/vapor/fluent-postgres-driver.git",
-            from: "2.8.0"
+            from: "2.9.2"
         ),
         // JWT
-        .package(url: "https://github.com/vapor/jwt.git", from: "4.0.0"),
+        .package(url: "https://github.com/vapor/jwt.git", from: "4.2.1"),
     ],
     targets: [
         .executableTarget(

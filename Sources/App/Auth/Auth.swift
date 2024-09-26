@@ -11,6 +11,7 @@ struct Tokens {
 enum AuthError: Error {
   case notValidToken
   case emailAlreadyUsed
+  case userHasNoPassword
   case invalidCredentials
 }
 
@@ -26,10 +27,11 @@ class Auth {
     self.jwt = jwt
   }
 
-  func register(email: String, password: String) async throws -> Tokens {
-    let user = try User(
+  func register(email: String, password: String?) async throws -> Tokens {
+    
+    let user = User(
       email: email,
-      passwordHash: Bcrypt.hash(password)
+      passwordHash: try password.map { try Bcrypt.hash($0) }
     )
 
     do {
@@ -49,8 +51,12 @@ class Auth {
     guard let user else {
       throw AuthError.invalidCredentials
     }
+    
+    guard let userPasswordHash = user.passwordHash else {
+      throw AuthError.userHasNoPassword
+    }
 
-    let sameHash = try Bcrypt.verify(password, created: user.passwordHash)
+    let sameHash = try Bcrypt.verify(password, created: userPasswordHash)
 
     guard sameHash else {
       throw AuthError.invalidCredentials

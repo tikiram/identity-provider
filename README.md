@@ -4,6 +4,7 @@
 ## Run
 
 ```bash
+swift run App migrate
 swift run App serve --port 3000
 ```
 
@@ -11,9 +12,7 @@ swift run App serve --port 3000
 
 - Check Vapor docs and add tests
 - Check Oauth 2 protocol standars
-
-
-## Client changes
-
-- signUp now returns tokens
-- client should handle error messages
+- Add password reset flow
+  - code generation
+  - email notification
+- Support passwordless email

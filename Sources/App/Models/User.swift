@@ -11,14 +11,14 @@ final class User: Model, @unchecked Sendable {
   var email: String
 
   @Field(key: "password_hash")
-  var passwordHash: String
+  var passwordHash: String?
 
   init() {}
 
   init(
     id: UUID? = nil,
     email: String,
-    passwordHash: String
+    passwordHash: String?
   ) {
     self.id = id
     self.email = email

@@ -35,9 +35,13 @@ struct AuthControler: RouteCollection {
   private func passwordGrandTypeHandler(_ req: Request) async throws -> TokensResponse {
     try PasswordGrandTypePayload.validate(content: req)
     let payload = try req.content.decode(PasswordGrandTypePayload.self)
+    
+    guard let password = payload.password else {
+      throw Abort(.badRequest, reason: "Missing password")
+    }
 
     let tokens = try await Auth(database: req.db, jwt: req.jwt)
-      .authenticate(email: payload.username, password: payload.password)
+      .authenticate(email: payload.username, password: password)
 
     return TokensResponse(tokens: tokens, expiresIn: Auth.accessTokenExpirationTime)
   }
