@@ -1,6 +1,6 @@
 import Fluent
-import PostgresNIO
 import JWTKit
+import PostgresNIO
 import Vapor
 
 struct Tokens {
@@ -28,7 +28,7 @@ class Auth {
   }
 
   func register(email: String, password: String?) async throws -> Tokens {
-    
+
     let user = User(
       email: email,
       passwordHash: try password.map { try Bcrypt.hash($0) }
@@ -51,7 +51,7 @@ class Auth {
     guard let user else {
       throw AuthError.invalidCredentials
     }
-    
+
     guard let userPasswordHash = user.passwordHash else {
       throw AuthError.userHasNoPassword
     }
@@ -73,25 +73,24 @@ class Auth {
   }
 
   func getNewAccessToken(refreshToken: String) async throws -> String {
-    
+
     // TODO: check these suggestions
     // https://stackoverflow.com/questions/59511628/is-it-secure-to-store-a-refresh-token-in-the-database-to-issue-new-access-toke
-    
+
     // TODO: check indexes on Session table
-    
+
     let session = try await Session.query(on: database)
       .with(\.$user)
       .filter(\.$refreshToken == refreshToken)
       .first()
-    
+
     guard let session else {
       throw AuthError.notValidToken
     }
-    
+
     do {
       let _ = try jwt.verify(refreshToken, as: TokenPayload.self)
-    }
-    catch let error as JWTError {
+    } catch let error as JWTError {
       try await session.delete(on: database)
       throw error
     }
