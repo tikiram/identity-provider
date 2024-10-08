@@ -30,6 +30,7 @@ let package = Package(
                 ),
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "JWT", package: "jwt"),
+                "Sendgrid",
             ],
             swiftSettings: swiftSettings
         ),
@@ -40,6 +41,12 @@ let package = Package(
                 .product(name: "XCTVapor", package: "vapor"),
             ],
             swiftSettings: swiftSettings
+        ),
+        .target(
+          name: "Sendgrid",
+          dependencies: [
+            .product(name: "Vapor", package: "vapor"),
+          ]
         ),
     ]
 )

@@ -6,6 +6,7 @@ import Vapor
 let SECRET_KEY = Environment.get("SECRET_KEY")
 let REFRESH_KEY = Environment.get("REFRESH_KEY")
 let DATABASE_URL = Environment.get("DATABASE_URL")
+let SENDGRID_API_KEY = Environment.get("SENDGRID_API_KEY")
 
 enum EnvironmentValueError: Error {
   case undefined(String)
@@ -21,11 +22,17 @@ public func configure(_ app: Application) async throws {
   guard let DATABASE_URL else {
     throw EnvironmentValueError.undefined("DATABASE_URL")
   }
+  guard let SENDGRID_API_KEY else {
+    throw RuntimeError("SENDGRID_API_KEY not defined")
+  }  
 
   // uncomment to serve files from /Public folder
   // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
 
   app.middleware.use(RepoErrorMiddleware())
+  
+  // email configuration
+  app.sendGridConfiguration = .init(apiKey: SENDGRID_API_KEY)
 
   // For some reason decode and encode strategy are different for the Date
   // type with this configuration both have the same strategy

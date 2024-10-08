@@ -21,10 +21,12 @@ class Auth {
 
   private let database: Database
   private let jwt: Request.JWT
+  private let emailNotifications: EmailNotifications
 
-  init(database: Database, jwt: Request.JWT) {
-    self.database = database
-    self.jwt = jwt
+  init(_ req: Request) throws {
+    self.database = req.db
+    self.jwt = req.jwt
+    self.emailNotifications = try req.emailNotifications
   }
 
   func register(email: String, password: String?) async throws -> Tokens {
@@ -70,6 +72,20 @@ class Auth {
     let refreshToken = try createRefreshToken(of: user)
     try await storeRefreshToken(refreshToken, userId: user.requireID())
     return Tokens(accessToken: accessToken, refreshToken: refreshToken)
+  }
+  
+  private func storeRefreshToken(
+    _ refreshToken: String,
+    userId: User.IDValue
+  ) async throws {
+    let session = Session(refreshToken: refreshToken, userID: userId)
+    try await session.save(on: database)
+  }
+  
+  func logout(refreshToken: String) async throws {
+    try await Session.query(on: database)
+      .filter(\.$refreshToken == refreshToken)
+      .delete()
   }
 
   func getNewAccessToken(refreshToken: String) async throws -> String {
@@ -117,12 +133,24 @@ class Auth {
     let refreshToken = try jwt.sign(refreshPayload, kid: "refresh")
     return refreshToken
   }
-
-  private func storeRefreshToken(
-    _ refreshToken: String,
-    userId: User.IDValue
-  ) async throws {
-    let session = Session(refreshToken: refreshToken, userID: userId)
-    try await session.save(on: database)
+  
+  // TODO: remove client param
+  func sendResetCode(email: String, client: Client) async throws {
+    
+    let user = try await User.query(on: database)
+      .filter(\.$email == email)
+      .first()
+    
+    guard let user else {
+      return
+    }
+    
+    // TODO: generate code
+    
+    let code = 123434
+    
+    
+    try await self.emailNotifications.sendRecoveryCode(to: email, code: code)
   }
+  
 }

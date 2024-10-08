@@ -7,7 +7,7 @@ POST {{host}}/auth/register
 Content-Type: application/json
 
 {
-  "username": "test6@test.com",
+  "username": "test@test.com",
   "password": "test"
 }
 
@@ -51,3 +51,9 @@ Content-Type: application/json
 GET {{host}}/info
 Content-Type: application/json
 Authorization: Bearer {{access_token}}
+
+###
+
+POST {{host}}/auth/reset
+Content-Type: application/json
+
