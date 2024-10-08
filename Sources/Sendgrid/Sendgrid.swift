@@ -1,34 +1,32 @@
-
 import Vapor
 
 public class Sendgrid {
-  
+
   private let client: Client
   private let token: String
-  
+
   public init(client: Client, token: String) {
     self.client = client
     self.token = token
   }
-  
+
   public func sendEmail(_ payload: SendgridPayload) async throws {
     let response = try await client.post("https://api.sendgrid.com/v3/mail/send") { req in
-      
+
       let authorization = BearerAuthorization(token: token)
       req.headers.bearerAuthorization = authorization
-      
-      
+
       try req.content.encode(payload)
     }
-    
+
     guard response.status == .ok else {
 
       print(response.status)
       print(response.description)
-      
+
       throw MailError.badResponse(response.description)
     }
-    
+
   }
 }
 
@@ -41,8 +39,10 @@ public struct SendgridPayload: Content {
   let from: FromPayload
   let subject: String
   let content: [EmailContent]
-  
-  public init(personalizations: [Personalization], from: FromPayload, subject: String, content: [EmailContent]) {
+
+  public init(
+    personalizations: [Personalization], from: FromPayload, subject: String, content: [EmailContent]
+  ) {
     self.personalizations = personalizations
     self.from = from
     self.subject = subject

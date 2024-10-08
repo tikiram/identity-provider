@@ -73,7 +73,7 @@ class Auth {
     try await storeRefreshToken(refreshToken, userId: user.requireID())
     return Tokens(accessToken: accessToken, refreshToken: refreshToken)
   }
-  
+
   private func storeRefreshToken(
     _ refreshToken: String,
     userId: User.IDValue
@@ -81,7 +81,7 @@ class Auth {
     let session = Session(refreshToken: refreshToken, userID: userId)
     try await session.save(on: database)
   }
-  
+
   func logout(refreshToken: String) async throws {
     try await Session.query(on: database)
       .filter(\.$refreshToken == refreshToken)
@@ -133,24 +133,22 @@ class Auth {
     let refreshToken = try jwt.sign(refreshPayload, kid: "refresh")
     return refreshToken
   }
-  
-  // TODO: remove client param
-  func sendResetCode(email: String, client: Client) async throws {
-    
+
+  func sendResetCode(email: String) async throws {
+
     let user = try await User.query(on: database)
       .filter(\.$email == email)
       .first()
-    
+
     guard let user else {
       return
     }
-    
+
     // TODO: generate code
-    
+
     let code = 123434
-    
-    
+
     try await self.emailNotifications.sendRecoveryCode(to: email, code: code)
   }
-  
+
 }

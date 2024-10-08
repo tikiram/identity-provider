@@ -22,24 +22,23 @@ struct AuthControler: RouteCollection {
 
     return TokensResponse(tokens: tokens, expiresIn: Auth.accessTokenExpirationTime)
   }
-  
+
   func logout(_ req: Request) async throws -> HTTPStatus {
-    
+
     try RefreshTokenGrandTypePayload.validate(content: req)
     let payload = try req.content.decode(RefreshTokenGrandTypePayload.self)
-    
+
     try await Auth(req)
       .logout(refreshToken: payload.refreshToken)
-    
+
     return .noContent
   }
-  
+
   func resetPassword(_ req: Request) async throws -> HTTPStatus {
 
     try await Auth(req)
-      .sendResetCode(email: "test@test.com", client: req.client)
-      
-    
+      .sendResetCode(email: "test@test.com")
+
     return .noContent
   }
 

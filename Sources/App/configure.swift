@@ -24,13 +24,13 @@ public func configure(_ app: Application) async throws {
   }
   guard let SENDGRID_API_KEY else {
     throw RuntimeError("SENDGRID_API_KEY not defined")
-  }  
+  }
 
   // uncomment to serve files from /Public folder
   // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
 
   app.middleware.use(RepoErrorMiddleware())
-  
+
   // email configuration
   app.sendGridConfiguration = .init(apiKey: SENDGRID_API_KEY)
 
