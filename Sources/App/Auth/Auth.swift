@@ -22,17 +22,19 @@ class Auth {
   private let database: Database
   private let jwt: Request.JWT
   private let emailNotifications: EmailNotifications
+  private let logger: Logger
 
   init(_ req: Request) throws {
     self.database = req.db
     self.jwt = req.jwt
     self.emailNotifications = try req.emailNotifications
+    self.logger = req.logger
   }
 
   func register(email: String, password: String?) async throws -> Tokens {
 
     let user = User(
-      email: email,
+      email: email.lowercased(),
       passwordHash: try password.map { try Bcrypt.hash($0) }
     )
 
@@ -137,16 +139,22 @@ class Auth {
   func sendResetCode(email: String) async throws {
 
     let user = try await User.query(on: database)
-      .filter(\.$email == email)
+      .filter(\.$email == email.lowercased())
       .first()
 
     guard let user else {
+      // Visitor has no way to check the email is associated to an user
+      self.logger.info("Email not associated to an user")
       return
     }
 
-    // TODO: generate code
+    self.logger.info("Email associated to an user")
 
-    let code = 123434
+    let randomInt = Int.random(in: 0..<999999)
+    let code = String(format: "%06d", randomInt)
+
+    let resetAttempt = try ResetAttempt(userID: user.requireID(), email: email.lowercased(), code: code)
+    try await resetAttempt.save(on: self.database)
 
     try await self.emailNotifications.sendRecoveryCode(to: email, code: code)
   }

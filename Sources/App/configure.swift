@@ -26,6 +26,9 @@ public func configure(_ app: Application) async throws {
     throw RuntimeError("SENDGRID_API_KEY not defined")
   }
 
+
+  app.http.server.configuration.port = 3000
+
   // uncomment to serve files from /Public folder
   // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
 
@@ -70,6 +73,7 @@ public func configure(_ app: Application) async throws {
   // app.logger.logLevel = .debug
 
   app.migrations.add(AuthMigration01())
+  app.migrations.add(ResetAttemptMigration01())
 
   if app.environment == .production {
     try await app.autoMigrate()

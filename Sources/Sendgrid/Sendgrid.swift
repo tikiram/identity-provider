@@ -18,9 +18,10 @@ public class Sendgrid {
 
       try req.content.encode(payload)
     }
+    
+    guard response.status.code.isMultiple(of: 200) else {
 
-    guard response.status == .ok else {
-
+      // TODO: refactor this with better error details
       print(response.status)
       print(response.description)
 

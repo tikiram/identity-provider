@@ -41,7 +41,7 @@ Content-Type: application/json
   client.global.set("access_token", response.body.access_token);
 %}
 
-###
+### Info
 
 GET http://localhost:3000/info
 Content-Type: application/json

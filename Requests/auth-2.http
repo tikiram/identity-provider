@@ -7,7 +7,7 @@ POST {{host}}/auth/register
 Content-Type: application/json
 
 {
-  "username": "test@test.com",
+  "username": "tikiram@icloud.com",
   "password": "test"
 }
 
@@ -56,4 +56,8 @@ Authorization: Bearer {{access_token}}
 
 POST {{host}}/auth/reset
 Content-Type: application/json
+
+{
+  "email": "tikiram@icloud.com"
+}
 

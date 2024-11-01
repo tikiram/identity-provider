@@ -34,10 +34,13 @@ struct AuthControler: RouteCollection {
     return .noContent
   }
 
+
   func resetPassword(_ req: Request) async throws -> HTTPStatus {
+    try ResetPasswordPayload.validate(content: req)
+    let payload = try req.content.decode(ResetPasswordPayload.self)
 
     try await Auth(req)
-      .sendResetCode(email: "test@test.com")
+      .sendResetCode(email: payload.email)
 
     return .noContent
   }
