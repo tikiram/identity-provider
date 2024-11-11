@@ -63,6 +63,7 @@ class Auth {
     let sameHash = try Bcrypt.verify(password, created: userPasswordHash)
 
     guard sameHash else {
+      // TODO: block user for certain amount of time after 3 attempts
       throw AuthError.invalidCredentials
     }
 
@@ -91,6 +92,9 @@ class Auth {
   }
 
   func getNewAccessToken(refreshToken: String) async throws -> String {
+    
+    // TODO: detect stolen refreshToken, a token should only be re-used
+    // after access-token expiration time
 
     // TODO: check these suggestions
     // https://stackoverflow.com/questions/59511628/is-it-secure-to-store-a-refresh-token-in-the-database-to-issue-new-access-toke
@@ -107,6 +111,7 @@ class Auth {
     }
 
     do {
+      // this will most likely validate expiration time
       let _ = try jwt.verify(refreshToken, as: TokenPayload.self)
     } catch let error as JWTError {
       try await session.delete(on: database)

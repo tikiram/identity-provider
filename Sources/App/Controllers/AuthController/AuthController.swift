@@ -39,6 +39,8 @@ struct AuthControler: RouteCollection {
     try ResetPasswordPayload.validate(content: req)
     let payload = try req.content.decode(ResetPasswordPayload.self)
 
+    // TODO: get actual payload
+    
     try await Auth(req)
       .sendResetCode(email: payload.email)
 
