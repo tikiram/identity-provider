@@ -78,6 +78,14 @@ struct AuthControler: RouteCollection {
 
     let accessToken = try await Auth(req)
       .getNewAccessToken(refreshToken: payload.refreshToken)
+    
+//    let r = Response()
+//    r.body = .init(data: try JSONEncoder().encode(accessToken))
+//    r.cookies["refreshToken"] = .init(stringLiteral: payload.refreshToken)
+    
+
+    
+//    r.body = .init(data:  )
 
     return TokensResponse(
       accessToken: accessToken,

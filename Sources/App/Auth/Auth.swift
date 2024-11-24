@@ -81,6 +81,7 @@ class Auth {
     _ refreshToken: String,
     userId: User.IDValue
   ) async throws {
+    // TODO: hash the refresh token same as with a password
     let session = Session(refreshToken: refreshToken, userID: userId)
     try await session.save(on: database)
   }
@@ -114,6 +115,7 @@ class Auth {
       // this will most likely validate expiration time
       let _ = try jwt.verify(refreshToken, as: TokenPayload.self)
     } catch let error as JWTError {
+      // TODO: do this only on expiration time validation
       try await session.delete(on: database)
       throw error
     }
