@@ -10,7 +10,7 @@ struct AuthControler: RouteCollection {
     router.post("reset", use: { try await resetPassword($0) })
   }
 
-  func register(req: Request) async throws -> TokensResponse {
+  func register(req: Request) async throws -> Response {
     try SignUpPayload.validate(content: req)
     let payload = try req.content.decode(SignUpPayload.self)
 
@@ -20,7 +20,7 @@ struct AuthControler: RouteCollection {
         password: payload.password
       )
 
-    return TokensResponse(tokens: tokens, expiresIn: Auth.accessTokenExpirationTime)
+    return try handleTokens(req, tokens)
   }
 
   func logout(_ req: Request) async throws -> HTTPStatus {
@@ -47,7 +47,7 @@ struct AuthControler: RouteCollection {
     return .noContent
   }
 
-  private func tokenHandler(_ req: Request) async throws -> TokensResponse {
+  private func tokenHandler(_ req: Request) async throws -> Response {
     try TokensPayload.validate(content: req)
     let tokensPayload = try req.content.decode(TokensPayload.self)
     switch tokensPayload.grandType {
@@ -58,7 +58,7 @@ struct AuthControler: RouteCollection {
     }
   }
 
-  private func passwordGrandTypeHandler(_ req: Request) async throws -> TokensResponse {
+  private func passwordGrandTypeHandler(_ req: Request) async throws -> Response {
     try PasswordGrandTypePayload.validate(content: req)
     let payload = try req.content.decode(PasswordGrandTypePayload.self)
 
@@ -68,28 +68,52 @@ struct AuthControler: RouteCollection {
 
     let tokens = try await Auth(req)
       .authenticate(email: payload.username, password: password)
-
-    return TokensResponse(tokens: tokens, expiresIn: Auth.accessTokenExpirationTime)
+    
+    return try handleTokens(req, tokens)
   }
+  
+  private func handleTokens(_ req: Request, _ tokens: Tokens) throws -> Response {
+    
+    // TODO: this cookie should only be created with web apps
 
-  private func refreshTokenGrandTypeHandler(_ req: Request) async throws -> TokensResponse {
+    
+    let tokensResponse = TokensResponse(tokens: tokens, expiresIn: Auth.accessTokenExpirationTime)
+    
+    // TODO: refactor this
+    
+    let response = Response()
+    try response.content.encode(tokensResponse, as: .json)
+    let cookie = HTTPCookies.Value(
+      string: tokens.refreshToken,
+      expires: Date().addingTimeInterval(Auth.refreshTokenExpirationTime),
+      isSecure: true,
+      isHTTPOnly: true
+    )
+    response.cookies["refreshToken"] = cookie
+    
+    return response
+  }
+  
+
+  private func refreshTokenGrandTypeHandler(_ req: Request) async throws -> Response {
     try RefreshTokenGrandTypePayload.validate(content: req)
     let payload = try req.content.decode(RefreshTokenGrandTypePayload.self)
+    
+    // TODO: we probably should rotate also the refresh token here
+    // This means a new accessToken and refreshToken will be generated
 
     let accessToken = try await Auth(req)
       .getNewAccessToken(refreshToken: payload.refreshToken)
     
-//    let r = Response()
-//    r.body = .init(data: try JSONEncoder().encode(accessToken))
-//    r.cookies["refreshToken"] = .init(stringLiteral: payload.refreshToken)
-    
-
-    
-//    r.body = .init(data:  )
-
-    return TokensResponse(
+    let tokensResponse = TokensResponse(
       accessToken: accessToken,
       expiresIn: Auth.accessTokenExpirationTime
-    )
+    )    
+    
+    // TODO: refactor this
+    let response = Response()
+    try response.content.encode(tokensResponse, as: .json)
+    
+    return response
   }
 }

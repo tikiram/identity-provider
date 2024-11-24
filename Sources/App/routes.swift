@@ -10,6 +10,7 @@ func routes(_ app: Application) throws {
     "Hello, world!"
   }
 
+//  try app.grouped(app.sessions.middleware).register(collection: AuthControler())
   try app.register(collection: AuthControler())
 
   let secure =

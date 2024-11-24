@@ -22,7 +22,7 @@ POST {{host}}/auth/token
 Content-Type: application/json
 
 {
-  "username": "test6@test.com",
+  "username": "tikiram@icloud.com",
   "password": "test",
   "grand_type": "password"
 }
