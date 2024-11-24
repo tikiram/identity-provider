@@ -19,7 +19,7 @@ Content-Type: application/json
 {
   "username": "test6@test.com",
   "password": "test",
-  "grand_type": "password"
+  "grant_type": "password"
 }
 
 > {%
@@ -34,7 +34,7 @@ Content-Type: application/json
 
 {
   "refresh_token": "{{refresh_token}}",
-  "grand_type": "refresh_token"
+  "grant_type": "refresh_token"
 }
 
 > {%

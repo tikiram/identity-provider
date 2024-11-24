@@ -25,8 +25,8 @@ struct AuthControler: RouteCollection {
 
   func logout(_ req: Request) async throws -> HTTPStatus {
 
-    try RefreshTokenGrandTypePayload.validate(content: req)
-    let payload = try req.content.decode(RefreshTokenGrandTypePayload.self)
+    try RefreshTokenGrantTypePayload.validate(content: req)
+    let payload = try req.content.decode(RefreshTokenGrantTypePayload.self)
 
     try await Auth(req)
       .logout(refreshToken: payload.refreshToken)
@@ -50,7 +50,7 @@ struct AuthControler: RouteCollection {
   private func tokenHandler(_ req: Request) async throws -> Response {
     try TokensPayload.validate(content: req)
     let tokensPayload = try req.content.decode(TokensPayload.self)
-    switch tokensPayload.grandType {
+    switch tokensPayload.grantType {
     case .password:
       return try await passwordGrandTypeHandler(req)
     case .refreshToken:
@@ -59,8 +59,8 @@ struct AuthControler: RouteCollection {
   }
 
   private func passwordGrandTypeHandler(_ req: Request) async throws -> Response {
-    try PasswordGrandTypePayload.validate(content: req)
-    let payload = try req.content.decode(PasswordGrandTypePayload.self)
+    try PasswordGrantTypePayload.validate(content: req)
+    let payload = try req.content.decode(PasswordGrantTypePayload.self)
 
     guard let password = payload.password else {
       throw Abort(.badRequest, reason: "Missing password")
@@ -96,8 +96,8 @@ struct AuthControler: RouteCollection {
   
 
   private func refreshTokenGrandTypeHandler(_ req: Request) async throws -> Response {
-    try RefreshTokenGrandTypePayload.validate(content: req)
-    let payload = try req.content.decode(RefreshTokenGrandTypePayload.self)
+    try RefreshTokenGrantTypePayload.validate(content: req)
+    let payload = try req.content.decode(RefreshTokenGrantTypePayload.self)
     
     // TODO: we probably should rotate also the refresh token here
     // This means a new accessToken and refreshToken will be generated

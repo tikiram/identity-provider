@@ -1,19 +1,19 @@
 import Vapor
 
-enum GrandType: String, Codable {
+enum GrantType: String, Codable {
   case password
   case refreshToken = "refresh_token"
 }
 
 struct TokensPayload: Content, Validatable {
-  let grandType: GrandType
+  let grantType: GrantType
 
   static func validations(_ validations: inout Vapor.Validations) {
-    validations.add("grandType", as: String.self, is: .in("password", "refresh_token"))
+    validations.add("grantType", as: String.self, is: .in("password", "refresh_token"))
   }
 }
 
-struct PasswordGrandTypePayload: Content, Validatable {
+struct PasswordGrantTypePayload: Content, Validatable {
   // TODO: some implementations send credentials on Authorization header using base64
   // TODO: username is actually `email`, check what is the standard
   let username: String
@@ -25,7 +25,7 @@ struct PasswordGrandTypePayload: Content, Validatable {
   }
 }
 
-struct RefreshTokenGrandTypePayload: Content, Validatable {
+struct RefreshTokenGrantTypePayload: Content, Validatable {
   let refreshToken: String
 
   static func validations(_ validations: inout Vapor.Validations) {
