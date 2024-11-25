@@ -29,6 +29,17 @@ public func configure(_ app: Application) async throws {
 
   app.http.server.configuration.port = 3000
 
+  
+  let corsConfiguration = CORSMiddleware.Configuration(
+    // TODO: origin should change on prod or qa
+    allowedOrigin: .all,
+    allowedMethods: [.GET, .POST, .PUT, .OPTIONS, .DELETE, .PATCH],
+    allowedHeaders: [.accept, .authorization, .contentType, .origin, .xRequestedWith, .userAgent, .accessControlAllowOrigin]
+  )
+  let cors = CORSMiddleware(configuration: corsConfiguration)
+  // cors middleware should come before default error middleware using `at: .beginning`
+  app.middleware.use(cors, at: .beginning)
+  
   // uncomment to serve files from /Public folder
   // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
 
@@ -75,6 +86,7 @@ public func configure(_ app: Application) async throws {
   app.migrations.add(AuthMigration01())
   app.migrations.add(ResetAttemptMigration01())
 
+  // TODO: this should ocurre on production and qa
   if app.environment == .production {
     try await app.autoMigrate()
   }
