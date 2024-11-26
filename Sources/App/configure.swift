@@ -32,9 +32,10 @@ public func configure(_ app: Application) async throws {
   
   let corsConfiguration = CORSMiddleware.Configuration(
     // TODO: origin should change on prod or qa
-    allowedOrigin: .all,
+    allowedOrigin: .any(["http://localhost:4000"]),
     allowedMethods: [.GET, .POST, .PUT, .OPTIONS, .DELETE, .PATCH],
-    allowedHeaders: [.accept, .authorization, .contentType, .origin, .xRequestedWith, .userAgent, .accessControlAllowOrigin]
+    allowedHeaders: [.accept, .authorization, .contentType, .origin, .xRequestedWith, .userAgent, .accessControlAllowOrigin],
+    allowCredentials: true
   )
   let cors = CORSMiddleware(configuration: corsConfiguration)
   // cors middleware should come before default error middleware using `at: .beginning`

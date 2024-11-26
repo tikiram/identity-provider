@@ -75,7 +75,6 @@ struct AuthControler: RouteCollection {
   private func handleTokens(_ req: Request, _ tokens: Tokens) throws -> Response {
     
     // TODO: this cookie should only be created with web apps
-
     
     let tokensResponse = TokensResponse(tokens: tokens, expiresIn: Auth.accessTokenExpirationTime)
     
@@ -87,7 +86,8 @@ struct AuthControler: RouteCollection {
       string: tokens.refreshToken,
       expires: Date().addingTimeInterval(Auth.refreshTokenExpirationTime),
       isSecure: true,
-      isHTTPOnly: true
+      isHTTPOnly: true,
+      sameSite: HTTPCookies.SameSitePolicy.none
     )
     response.cookies["refreshToken"] = cookie
     
@@ -96,6 +96,11 @@ struct AuthControler: RouteCollection {
   
 
   private func refreshTokenGrandTypeHandler(_ req: Request) async throws -> Response {
+    
+    //if let cookie = req.cookies["refreshToken"] {
+    //  print(cookie.string)
+    //}
+    
     try RefreshTokenGrantTypePayload.validate(content: req)
     let payload = try req.content.decode(RefreshTokenGrantTypePayload.self)
     
