@@ -71,27 +71,47 @@ struct AuthControler: RouteCollection {
     
     return try handleTokens(req, tokens)
   }
-  
+
+  // TODO: find a better name
   private func handleTokens(_ req: Request, _ tokens: Tokens) throws -> Response {
     
     // TODO: this cookie should only be created with web apps
     
     let tokensResponse = TokensResponse(tokens: tokens, expiresIn: Auth.accessTokenExpirationTime)
     
-    // TODO: refactor this
-    
     let response = Response()
     try response.content.encode(tokensResponse, as: .json)
+
+    let cookie = getRefreshTokenCookie(value: tokens.refreshToken, expirationTime: Auth.refreshTokenExpirationTime)
+    let indicatorCookie = getIndicatorCookie(cookie)
+    
+    response.cookies["refreshToken"] = cookie
+    response.cookies["refreshTokenIndicator"] = indicatorCookie
+    
+    return response
+  }
+  
+  private func getRefreshTokenCookie(value: String, expirationTime: TimeInterval) -> HTTPCookies.Value {
     let cookie = HTTPCookies.Value(
-      string: tokens.refreshToken,
-      expires: Date().addingTimeInterval(Auth.refreshTokenExpirationTime),
+      string: value,
+      expires: Date().addingTimeInterval(expirationTime),
       isSecure: true,
       isHTTPOnly: true,
       sameSite: HTTPCookies.SameSitePolicy.none
     )
-    response.cookies["refreshToken"] = cookie
-    
-    return response
+    return cookie
+  }
+  
+  private func getIndicatorCookie(_ cookie: HTTPCookies.Value) -> HTTPCookies.Value {
+    // Just a cookie that can be read from JS
+    let presenceCookie = HTTPCookies.Value(
+      string: "true",
+      expires: cookie.expires,
+      isSecure: cookie.isSecure,
+      isHTTPOnly: false,
+      sameSite: cookie.sameSite
+    )
+    return presenceCookie
   }
   
 
