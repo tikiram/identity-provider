@@ -7,9 +7,9 @@ class EmailNotifications {
   }
 
   func sendRecoveryCode(to email: String, code: String) async throws {
-    
+
     // TODO: move this to a configuration and get values from constructor
-    
+
     let payload = EmailPayload(
       from: "no-reply@equanimousoft.com",
       to: [email],

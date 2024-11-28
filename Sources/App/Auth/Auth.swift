@@ -93,7 +93,7 @@ class Auth {
   }
 
   func getNewAccessToken(refreshToken: String) async throws -> String {
-    
+
     // TODO: detect stolen refreshToken, a token should only be re-used
     // after access-token expiration time
 
@@ -160,7 +160,8 @@ class Auth {
     let randomInt = Int.random(in: 0..<999999)
     let code = String(format: "%06d", randomInt)
 
-    let resetAttempt = try ResetAttempt(userID: user.requireID(), email: email.lowercased(), code: code)
+    let resetAttempt = try ResetAttempt(
+      userID: user.requireID(), email: email.lowercased(), code: code)
     try await resetAttempt.save(on: self.database)
 
     try await self.emailNotifications.sendRecoveryCode(to: email, code: code)

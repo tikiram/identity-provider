@@ -6,13 +6,13 @@ final class ResetAttempt: Model, @unchecked Sendable {
 
   @ID(key: .id)
   var id: UUID?
-  
+
   @Parent(key: "user_id")
   var user: User
 
   @Field(key: "email")
   var email: String
-  
+
   @Field(key: "code")
   var code: String
 
