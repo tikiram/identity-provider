@@ -9,6 +9,8 @@ struct Tokens {
 }
 
 enum AuthError: Error {
+  case jwtError(JWTError)
+  case tokenNotFound
   case notValidToken
   case emailAlreadyUsed
   case userHasNoPassword
@@ -108,18 +110,17 @@ class Auth {
       .first()
 
     guard let session else {
-      throw AuthError.notValidToken
+      throw AuthError.tokenNotFound
     }
 
     do {
-      // this will most likely validate expiration time
       let _ = try jwt.verify(refreshToken, as: TokenPayload.self)
     } catch let error as JWTError {
-      // TODO: do this only on expiration time validation
       try await session.delete(on: database)
-      throw error
+      throw AuthError.jwtError(error)
     }
 
+    // TODO: create access token based on the content of the refreshToken
     let accessToken = try createAccessToken(of: session.user)
 
     return accessToken

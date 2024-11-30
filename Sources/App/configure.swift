@@ -34,7 +34,7 @@ public func configure(_ app: Application) async throws {
     allowedMethods: [.GET, .POST, .PUT, .OPTIONS, .DELETE, .PATCH],
     allowedHeaders: [
       .accept, .authorization, .contentType, .origin, .xRequestedWith, .userAgent,
-      .accessControlAllowOrigin,
+      .accessControlAllowOrigin, .setCookie, .setCookie2,
     ],
     allowCredentials: true
   )

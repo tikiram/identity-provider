@@ -80,17 +80,70 @@ struct AuthControler: RouteCollection {
 
     let response = Response()
     try response.content.encode(tokensResponse, as: .json)
-
-    let cookie = getRefreshTokenCookie(
-      value: tokens.refreshToken, expirationTime: Auth.refreshTokenExpirationTime)
-    let indicatorCookie = getIndicatorCookie(cookie)
-
-    response.cookies["refreshToken"] = cookie
-    response.cookies["refreshTokenIndicator"] = indicatorCookie
+    
+    AuthResponseManager(response)
+      .setRefreshTokenCookie(tokens.refreshToken, expirationTime: Auth.refreshTokenExpirationTime)
 
     return response
   }
 
+  private func refreshTokenGrandTypeHandler(_ req: Request) async throws -> Response {
+
+    guard let refreshTokenCookie = req.cookies["refreshToken"] else {
+      throw Abort(.unauthorized, reason: "Missing refresh token")
+    }
+    
+    // TODO: we should rotate also the refresh token here
+    // This means a new accessToken and refreshToken will be generated
+
+    do {
+      let accessToken = try await Auth(req)
+        .getNewAccessToken(refreshToken: refreshTokenCookie.string)
+
+      let tokensResponse = TokensResponse(
+        accessToken: accessToken,
+        expiresIn: Auth.accessTokenExpirationTime
+      )
+
+      let response = Response()
+      try response.content.encode(tokensResponse, as: .json)
+      return response
+    }
+    catch let error as AuthError {
+      let payload = GenericErrorPayload(reason: error.localizedDescription)
+      let response = Response(status: .unauthorized)
+      try response.content.encode(payload, as: .json)
+      AuthResponseManager(response)
+        .setRefreshTokenCookie("", expirationTime: 0)
+      return response
+    }
+
+  }
+}
+
+struct GenericErrorPayload: Codable {
+  let reason: String
+}
+
+class AuthResponseManager {
+  
+  private let response: Response
+  
+  init(_ response: Response) {
+    self.response = response
+  }
+  
+  func setRefreshTokenCookie(_ refreshToken: String, expirationTime: TimeInterval) {
+    
+    let cookie = getRefreshTokenCookie(
+      value: refreshToken, expirationTime: expirationTime)
+    let indicatorCookie = getIndicatorCookie(cookie)
+
+    response.cookies["refreshToken"] = cookie
+    response.cookies["refreshTokenIndicator"] = indicatorCookie
+    
+  }
+  
   private func getRefreshTokenCookie(value: String, expirationTime: TimeInterval)
     -> HTTPCookies.Value
   {
@@ -102,44 +155,5 @@ struct AuthControler: RouteCollection {
       sameSite: HTTPCookies.SameSitePolicy.none
     )
     return cookie
-  }
-
-  private func getIndicatorCookie(_ cookie: HTTPCookies.Value) -> HTTPCookies.Value {
-    // Just a cookie that can be read from JS
-    let presenceCookie = HTTPCookies.Value(
-      string: "true",
-      expires: cookie.expires,
-      isSecure: cookie.isSecure,
-      isHTTPOnly: false,
-      sameSite: cookie.sameSite
-    )
-    return presenceCookie
-  }
-
-  private func refreshTokenGrandTypeHandler(_ req: Request) async throws -> Response {
-
-    //if let cookie = req.cookies["refreshToken"] {
-    //  print(cookie.string)
-    //}
-
-    try RefreshTokenGrantTypePayload.validate(content: req)
-    let payload = try req.content.decode(RefreshTokenGrantTypePayload.self)
-
-    // TODO: we probably should rotate also the refresh token here
-    // This means a new accessToken and refreshToken will be generated
-
-    let accessToken = try await Auth(req)
-      .getNewAccessToken(refreshToken: payload.refreshToken)
-
-    let tokensResponse = TokensResponse(
-      accessToken: accessToken,
-      expiresIn: Auth.accessTokenExpirationTime
-    )
-
-    // TODO: refactor this
-    let response = Response()
-    try response.content.encode(tokensResponse, as: .json)
-
-    return response
   }
 }

@@ -11,10 +11,14 @@ struct RepoErrorMiddleware: AsyncMiddleware {
         throw Abort(.badRequest, reason: "EMAIL_ALREADY_USED")
       case .invalidCredentials:
         throw Abort(.unauthorized, reason: "INVALID_CREDENTIALS")
+      case .tokenNotFound:
+        throw Abort(.unauthorized, reason: "INVALID_TOKEN")
       case .notValidToken:
         throw Abort(.unauthorized, reason: "INVALID_TOKEN")
       case .userHasNoPassword:
         throw Abort(.unauthorized, reason: "USER_HAS_NO_PASSWORD")
+      case .jwtError(_):
+        throw error
       }
     }
   }

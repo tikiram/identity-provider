@@ -1,4 +1,4 @@
-GET {{host}}
+`GET {{host}}
 Accept: application/json
 
 ### Register
