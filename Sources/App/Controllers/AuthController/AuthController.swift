@@ -23,15 +23,24 @@ struct AuthControler: RouteCollection {
     return try handleTokens(req, tokens)
   }
 
-  func logout(_ req: Request) async throws -> HTTPStatus {
+  func logout(_ req: Request) async throws -> Response {
 
-    try RefreshTokenGrantTypePayload.validate(content: req)
-    let payload = try req.content.decode(RefreshTokenGrantTypePayload.self)
+    // try RefreshTokenGrantTypePayload.validate(content: req)
+    // let payload = try req.content.decode(RefreshTokenGrantTypePayload.self)
+    
+    guard let refreshTokenCookie = req.cookies["refreshToken"] else {
+      throw Abort(.unauthorized, reason: "Missing refresh token")
+    }
 
     try await Auth(req)
-      .logout(refreshToken: payload.refreshToken)
+      .logout(refreshToken: refreshTokenCookie.string)
+    
+    let response = Response(status: .noContent)
+    
+    AuthResponseManager(response)
+      .setRefreshTokenCookie("", expirationTime: 0)
 
-    return .noContent
+    return response
   }
 
   func resetPassword(_ req: Request) async throws -> HTTPStatus {
@@ -125,35 +134,3 @@ struct GenericErrorPayload: Codable {
   let reason: String
 }
 
-class AuthResponseManager {
-  
-  private let response: Response
-  
-  init(_ response: Response) {
-    self.response = response
-  }
-  
-  func setRefreshTokenCookie(_ refreshToken: String, expirationTime: TimeInterval) {
-    
-    let cookie = getRefreshTokenCookie(
-      value: refreshToken, expirationTime: expirationTime)
-    let indicatorCookie = getIndicatorCookie(cookie)
-
-    response.cookies["refreshToken"] = cookie
-    response.cookies["refreshTokenIndicator"] = indicatorCookie
-    
-  }
-  
-  private func getRefreshTokenCookie(value: String, expirationTime: TimeInterval)
-    -> HTTPCookies.Value
-  {
-    let cookie = HTTPCookies.Value(
-      string: value,
-      expires: Date().addingTimeInterval(expirationTime),
-      isSecure: true,
-      isHTTPOnly: true,
-      sameSite: HTTPCookies.SameSitePolicy.none
-    )
-    return cookie
-  }
-}

@@ -89,6 +89,8 @@ class Auth {
   }
 
   func logout(refreshToken: String) async throws {
+    // TODO: soft delete session
+    
     try await Session.query(on: database)
       .filter(\.$refreshToken == refreshToken)
       .delete()
