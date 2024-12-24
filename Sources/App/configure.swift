@@ -42,9 +42,6 @@ public func configure(_ app: Application) async throws {
   // cors middleware should come before default error middleware using `at: .beginning`
   app.middleware.use(cors, at: .beginning)
 
-  // uncomment to serve files from /Public folder
-  // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
-
   app.middleware.use(RepoErrorMiddleware())
 
   // email configuration
@@ -65,6 +62,8 @@ public func configure(_ app: Application) async throws {
   // settign the JWT keys
   app.jwt.signers.use(.hs256(key: SECRET_KEY), kid: "secret", isDefault: true)
   app.jwt.signers.use(.hs256(key: REFRESH_KEY), kid: "refresh")
+  // TODO: use RS256 key
+
 
   if app.environment == .production {
     var tlsConfig: TLSConfiguration = .makeClientConfiguration()

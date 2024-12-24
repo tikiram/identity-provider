@@ -1,22 +1,42 @@
 
 # identity-provider
 
-- Set .env file
+## Database
 
-```bash
-cp example.env .env
 ```
+brew install postgresql@15
+```
+
+```sql
+CREATE USER postgres SUPERUSER;
+```
+
+```sql
+create database identity_provider;
+```
+
+## Project setup
 
 - Set working directory on Xcode
 
 https://docs.vapor.codes/getting-started/xcode/
 
+- Edit scheme
+  - run
+    - Options
+    - Working directory
+
+
 ## Run
 
-```bash
+```
 swift run App migrate
+```
+
+```bash
 swift run App serve
 ```
+
 
 ## General ToDos
 
