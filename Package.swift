@@ -18,6 +18,11 @@ let package = Package(
         ),
         // JWT
         .package(url: "https://github.com/vapor/jwt.git", from: "4.2.1"),
+        // AWS
+        .package(
+            url: "https://github.com/awslabs/aws-sdk-swift",
+            from: "1.0.69"
+        )
     ],
     targets: [
         .executableTarget(
@@ -30,6 +35,7 @@ let package = Package(
                 ),
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "JWT", package: "jwt"),
+                .product(name: "AWSDynamoDB", package: "aws-sdk-swift"),
                 "Sendgrid",
             ],
             swiftSettings: swiftSettings
