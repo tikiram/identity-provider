@@ -1,0 +1,2 @@
+GET {{host}}/playground
+Accept: application/json
