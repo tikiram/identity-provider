@@ -1,4 +1,5 @@
 import Fluent
+import AWSDynamoDB
 import JWTKit
 import PostgresNIO
 import Vapor
@@ -25,12 +26,15 @@ class Auth {
   private let jwt: Request.JWT
   private let emailNotifications: EmailNotifications
   private let logger: Logger
+  
+  private let sessionRepo: SessionRepo
 
-  init(_ req: Request) throws {
+  init(_ req: Request) async throws {
     self.database = req.db
     self.jwt = req.jwt
     self.emailNotifications = try req.emailNotifications
     self.logger = req.logger
+    self.sessionRepo = try await SessionRepo(client: req.dynamoDBClient, tableName: "session")
   }
 
   func register(email: String, password: String?) async throws -> Tokens {
@@ -73,27 +77,17 @@ class Auth {
   }
 
   private func createTokens(of user: User) async throws -> Tokens {
-    let accessToken = try createAccessToken(of: user)
+    let accessToken = try createAccessToken(of: user.requireID().uuidString)
     let refreshToken = try createRefreshToken(of: user)
-    try await storeRefreshToken(refreshToken, userId: user.requireID())
+    
+    try await self.sessionRepo.save(userId: user.requireID().uuidString, refreshToken: refreshToken)
+    
     return Tokens(accessToken: accessToken, refreshToken: refreshToken)
   }
 
-  private func storeRefreshToken(
-    _ refreshToken: String,
-    userId: User.IDValue
-  ) async throws {
-    // TODO: hash the refresh token same as with a password
-    let session = Session(refreshToken: refreshToken, userID: userId)
-    try await session.save(on: database)
-  }
-
   func logout(refreshToken: String) async throws {
-    // TODO: soft delete session
-    
-    try await Session.query(on: database)
-      .filter(\.$refreshToken == refreshToken)
-      .delete()
+    let payload = try jwt.verify(refreshToken, as: TokenPayload.self)
+    try await self.sessionRepo.softDelete(userId: payload.userId.uuidString, refreshToken: refreshToken)
   }
 
   func getNewAccessToken(refreshToken: String) async throws -> String {
@@ -103,34 +97,28 @@ class Auth {
 
     // TODO: check these suggestions
     // https://stackoverflow.com/questions/59511628/is-it-secure-to-store-a-refresh-token-in-the-database-to-issue-new-access-toke
-
-    // TODO: check indexes on Session table
-
-    let session = try await Session.query(on: database)
-      .with(\.$user)
-      .filter(\.$refreshToken == refreshToken)
-      .first()
-
-    guard let session else {
-      throw AuthError.tokenNotFound
-    }
-
+    
     do {
-      let _ = try jwt.verify(refreshToken, as: TokenPayload.self)
+      let payload = try jwt.verify(refreshToken, as: TokenPayload.self)
+      
+      let isValid = try await sessionRepo.getIsValid(userId: payload.userId.uuidString, refreshToken: refreshToken)
+
+      guard isValid else {
+        throw AuthError.tokenNotFound
+      }
+      
+      // TODO: create access token based on the content of the refreshToken
+      let accessToken = try createAccessToken(of: payload.userId.uuidString)
+
+      return accessToken
     } catch let error as JWTError {
-      try await session.delete(on: database)
       throw AuthError.jwtError(error)
     }
-
-    // TODO: create access token based on the content of the refreshToken
-    let accessToken = try createAccessToken(of: session.user)
-
-    return accessToken
   }
 
-  private func createAccessToken(of user: User) throws -> String {
+  private func createAccessToken(of userId: String) throws -> String {
     let payload = TokenPayload(
-      user: user,
+      userId: userId,
       duration: Self.accessTokenExpirationTime
     )
     let token = try jwt.sign(payload)
@@ -139,7 +127,7 @@ class Auth {
 
   private func createRefreshToken(of user: User) throws -> String {
     let refreshPayload = TokenPayload(
-      user: user,
+      userId: try user.requireID().uuidString,
       duration: Self.refreshTokenExpirationTime
     )
     let refreshToken = try jwt.sign(refreshPayload, kid: "refresh")

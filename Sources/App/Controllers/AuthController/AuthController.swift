@@ -36,7 +36,6 @@ struct AuthControler: RouteCollection {
       .logout(refreshToken: refreshTokenCookie.string)
     
     let response = Response(status: .noContent)
-    
     AuthResponseManager(response)
       .setRefreshTokenCookie("", expirationTime: 0)
 
