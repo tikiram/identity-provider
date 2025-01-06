@@ -1,4 +1,3 @@
-
 final class Session {
   //  static let schema = "session"
   //

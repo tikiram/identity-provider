@@ -1,4 +1,3 @@
-
 final class ResetAttempt {
   //  static let schema = "reset_attempt"
   //
