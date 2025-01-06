@@ -1,11 +1,7 @@
-import Fluent
-import FluentPostgresDriver
-import NIOSSL
 import Vapor
 
 let SECRET_KEY = Environment.get("SECRET_KEY")
 let REFRESH_KEY = Environment.get("REFRESH_KEY")
-let DATABASE_URL = Environment.get("DATABASE_URL")
 let SENDGRID_API_KEY = Environment.get("SENDGRID_API_KEY")
 
 enum EnvironmentValueError: Error {
@@ -19,9 +15,7 @@ public func configure(_ app: Application) async throws {
   guard let REFRESH_KEY else {
     throw EnvironmentValueError.undefined("REFRESH_KEY")
   }
-  guard let DATABASE_URL else {
-    throw EnvironmentValueError.undefined("DATABASE_URL")
-  }
+
   guard let SENDGRID_API_KEY else {
     throw RuntimeError("SENDGRID_API_KEY not defined")
   }
@@ -64,33 +58,32 @@ public func configure(_ app: Application) async throws {
   app.jwt.signers.use(.hs256(key: REFRESH_KEY), kid: "refresh")
   // TODO: use RS256 key
 
-
-  if app.environment == .production {
-    var tlsConfig: TLSConfiguration = .makeClientConfiguration()
-    tlsConfig.certificateVerification = .none
-    let nioSSLContext = try NIOSSLContext(configuration: tlsConfig)
-
-    var postgresConfig = try SQLPostgresConfiguration(url: DATABASE_URL)
-    postgresConfig.coreConfiguration.tls = .require(nioSSLContext)
-
-    app.databases.use(.postgres(configuration: postgresConfig), as: .psql)
-  } else {
-    try app.databases.use(
-      DatabaseConfigurationFactory.postgres(url: DATABASE_URL),
-      as: .psql
-    )
-  }
+  //  if app.environment == .production {
+  //    var tlsConfig: TLSConfiguration = .makeClientConfiguration()
+  //    tlsConfig.certificateVerification = .none
+  //    let nioSSLContext = try NIOSSLContext(configuration: tlsConfig)
+  //
+  //    var postgresConfig = try SQLPostgresConfiguration(url: DATABASE_URL)
+  //    postgresConfig.coreConfiguration.tls = .require(nioSSLContext)
+  //
+  //    app.databases.use(.postgres(configuration: postgresConfig), as: .psql)
+  //  } else {
+  //    try app.databases.use(
+  //      DatabaseConfigurationFactory.postgres(url: DATABASE_URL),
+  //      as: .psql
+  //    )
+  //  }
 
   // This can be used to see the generated SQL sentences
   // app.logger.logLevel = .debug
 
-  app.migrations.add(AuthMigration01())
-  app.migrations.add(ResetAttemptMigration01())
+  //  app.migrations.add(AuthMigration01())
+  //  app.migrations.add(ResetAttemptMigration01())
 
   // TODO: this should ocurre on production and qa
-  if app.environment == .production {
-    try await app.autoMigrate()
-  }
+  //  if app.environment == .production {
+  //    try await app.autoMigrate()
+  //  }
 
   // register routes
   try routes(app)

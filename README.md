@@ -1,20 +1,6 @@
 
 # identity-provider
 
-## Database
-
-```
-brew install postgresql@15
-```
-
-```sql
-CREATE USER postgres SUPERUSER;
-```
-
-```sql
-create database identity_provider;
-```
-
 ## Project setup
 
 - Set working directory on Xcode
@@ -25,13 +11,29 @@ https://docs.vapor.codes/getting-started/xcode/
   - run
     - Options
     - Working directory
+    
+### AWS
 
+Set env access and secret key
+
+- `.env` file (for Xcode)
+- `~/.zshrc` file (for terraform)
+
+#### Terraform
+
+https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
+
+brew update
+brew tap hashicorp/tap
+brew install hashicorp/tap/terraform
+
+terraform --help
+
+terraform init
+terraform plan
+terraform apply
 
 ## Run
-
-```
-swift run App migrate
-```
 
 ```bash
 swift run App serve
