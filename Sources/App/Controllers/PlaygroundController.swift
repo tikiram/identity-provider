@@ -9,9 +9,9 @@ struct PlaygroundController: RouteCollection {
   }
 
   func get(req: Request) async throws -> HTTPStatus {
-    
+
     try await something()
-    
+
     return .noContent
 
   }

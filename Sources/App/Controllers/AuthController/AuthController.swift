@@ -27,14 +27,14 @@ struct AuthControler: RouteCollection {
 
     // try RefreshTokenGrantTypePayload.validate(content: req)
     // let payload = try req.content.decode(RefreshTokenGrantTypePayload.self)
-    
+
     guard let refreshTokenCookie = req.cookies["refreshToken"] else {
       throw Abort(.unauthorized, reason: "Missing refresh token")
     }
 
     try await Auth(req)
       .logout(refreshToken: refreshTokenCookie.string)
-    
+
     let response = Response(status: .noContent)
     AuthResponseManager(response)
       .setRefreshTokenCookie("", expirationTime: 0)
@@ -88,7 +88,7 @@ struct AuthControler: RouteCollection {
 
     let response = Response()
     try response.content.encode(tokensResponse, as: .json)
-    
+
     AuthResponseManager(response)
       .setRefreshTokenCookie(tokens.refreshToken, expirationTime: Auth.refreshTokenExpirationTime)
 
@@ -100,7 +100,7 @@ struct AuthControler: RouteCollection {
     guard let refreshTokenCookie = req.cookies["refreshToken"] else {
       throw Abort(.unauthorized, reason: "Missing refresh token")
     }
-    
+
     // TODO: we should rotate also the refresh token here
     // This means a new accessToken and refreshToken will be generated
 
@@ -116,8 +116,7 @@ struct AuthControler: RouteCollection {
       let response = Response()
       try response.content.encode(tokensResponse, as: .json)
       return response
-    }
-    catch let error as AuthError {
+    } catch let error as AuthError {
       let payload = GenericErrorPayload(reason: error.localizedDescription)
       let response = Response(status: .unauthorized)
       try response.content.encode(payload, as: .json)
@@ -132,4 +131,3 @@ struct AuthControler: RouteCollection {
 struct GenericErrorPayload: Codable {
   let reason: String
 }
-

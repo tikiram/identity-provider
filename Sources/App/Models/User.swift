@@ -1,27 +1,17 @@
-import Fluent
-import Vapor
+import AWSDynamoDB
 
-final class User: Model, @unchecked Sendable {
-  static let schema = "user"
-
-  @ID(key: .id)
-  var id: UUID?
-
-  @Field(key: "email")
-  var email: String
-
-  @Field(key: "password_hash")
-  var passwordHash: String?
-
-  init() {}
-
-  init(
-    id: UUID? = nil,
-    email: String,
-    passwordHash: String?
-  ) {
+struct User {
+  let id: String
+  
+  init(id: String) {
     self.id = id
-    self.email = email
-    self.passwordHash = passwordHash
+  }
+
+  init(_ attributes: [String: DynamoDBClientTypes.AttributeValue]?) throws {
+    guard let attributes else {
+      throw RuntimeError("attributes is null")
+    }
+
+    self.id = try getStringFromAttribute(attributes["id"])
   }
 }

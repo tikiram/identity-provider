@@ -10,11 +10,47 @@ terraform {
 }
 
 provider "aws" {
-  # region  = "us-east-1"
+}
+
+resource "aws_dynamodb_table" "user" {
+  name = "dev_auth_user"
+
+  billing_mode = "PAY_PER_REQUEST"
+
+  hash_key = "id"
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+
+  # Unique constraint can not be achieve with an gsi
+  # global_secondary_index {
+  #   name               = "emailIndex"
+  #   hash_key           = "email"
+  #   projection_type    = "INCLUDE"
+  #   non_key_attributes = ["passwordHash"]
+  # }
+}
+
+resource "aws_dynamodb_table" "user_email" {
+  name         = "dev_auth_user_email_method"
+  billing_mode = "PAY_PER_REQUEST"
+
+  hash_key = "email"
+
+  attribute {
+    name = "email"
+    type = "S"
+  }
+
+  # passwordHash: S
+  # userId: S
 }
 
 resource "aws_dynamodb_table" "session" {
-  name = "session"
+  // TODO: create reusable modules to create the same resources on different envs
+  name = "dev_auth_session"
 
   billing_mode = "PAY_PER_REQUEST"
 
@@ -23,7 +59,7 @@ resource "aws_dynamodb_table" "session" {
 
   attribute {
     name = "userId"
-    type = "S"  # String data type
+    type = "S"
   }
 
   attribute {

@@ -1,7 +1,5 @@
 import Fluent
-import AWSDynamoDB
 import JWTKit
-import PostgresNIO
 import Vapor
 
 struct Tokens {
@@ -26,68 +24,63 @@ class Auth {
   private let jwt: Request.JWT
   private let emailNotifications: EmailNotifications
   private let logger: Logger
-  
+
   private let sessionRepo: SessionRepo
+  private let userRepo: UserRepo
 
   init(_ req: Request) async throws {
     self.database = req.db
     self.jwt = req.jwt
     self.emailNotifications = try req.emailNotifications
     self.logger = req.logger
-    self.sessionRepo = try await SessionRepo(client: req.dynamoDBClient, tableName: "session")
+    self.sessionRepo = try await SessionRepo(req.dynamoDBClient, tableNamePrefix: "dev_")
+    self.userRepo = try await UserRepo(req.dynamoDBClient, tableNamePrefix: "dev_")
   }
 
   func register(email: String, password: String?) async throws -> Tokens {
 
-    let user = User(
-      email: email.lowercased(),
-      passwordHash: try password.map { try Bcrypt.hash($0) }
-    )
+    //    do {
+    let user = try await userRepo.create(email: email, password: password!)
+    
+    // TODO: add this validation for DynamoDB
+    //    } catch let error as PSQLError where error.isConstraintFailure {
+    //      throw AuthError.emailAlreadyUsed
+    //    }
 
-    do {
-      try await user.save(on: database)
-    } catch let error as PSQLError where error.isConstraintFailure {
-      throw AuthError.emailAlreadyUsed
-    }
-
-    return try await createTokens(of: user)
+    return try await createTokens(userId: user.id)
   }
 
   func authenticate(email: String, password: String) async throws -> Tokens {
-    let user = try await User.query(on: database)
-      .filter(\.$email == email)
-      .first()
+    
+    let userEmailMethod = try await userRepo.getEmailMethod(email)
 
-    guard let user else {
+    guard let userEmailMethod else {
       throw AuthError.invalidCredentials
     }
 
-    guard let userPasswordHash = user.passwordHash else {
-      throw AuthError.userHasNoPassword
-    }
-
-    let sameHash = try Bcrypt.verify(password, created: userPasswordHash)
+    let sameHash = try Bcrypt.verify(password, created: userEmailMethod.passwordHash)
 
     guard sameHash else {
       // TODO: block user for certain amount of time after 3 attempts
       throw AuthError.invalidCredentials
     }
 
-    return try await createTokens(of: user)
+    return try await createTokens(userId: userEmailMethod.userId)
   }
 
-  private func createTokens(of user: User) async throws -> Tokens {
-    let accessToken = try createAccessToken(of: user.requireID().uuidString)
-    let refreshToken = try createRefreshToken(of: user)
-    
-    try await self.sessionRepo.save(userId: user.requireID().uuidString, refreshToken: refreshToken)
-    
+  private func createTokens(userId: String) async throws -> Tokens {
+    let accessToken = try createAccessToken(userId: userId)
+    let refreshToken = try createRefreshToken(userId: userId)
+
+    try await self.sessionRepo.save(userId: userId, refreshToken: refreshToken)
+
     return Tokens(accessToken: accessToken, refreshToken: refreshToken)
   }
 
   func logout(refreshToken: String) async throws {
     let payload = try jwt.verify(refreshToken, as: TokenPayload.self)
-    try await self.sessionRepo.softDelete(userId: payload.userId.uuidString, refreshToken: refreshToken)
+    try await self.sessionRepo.softDelete(
+      userId: payload.userId, refreshToken: refreshToken)
   }
 
   func getNewAccessToken(refreshToken: String) async throws -> String {
@@ -97,18 +90,19 @@ class Auth {
 
     // TODO: check these suggestions
     // https://stackoverflow.com/questions/59511628/is-it-secure-to-store-a-refresh-token-in-the-database-to-issue-new-access-toke
-    
+
     do {
       let payload = try jwt.verify(refreshToken, as: TokenPayload.self)
-      
-      let isValid = try await sessionRepo.getIsValid(userId: payload.userId.uuidString, refreshToken: refreshToken)
+
+      let isValid = try await sessionRepo.getIsValid(
+        userId: payload.userId, refreshToken: refreshToken)
 
       guard isValid else {
         throw AuthError.tokenNotFound
       }
-      
+
       // TODO: create access token based on the content of the refreshToken
-      let accessToken = try createAccessToken(of: payload.userId.uuidString)
+      let accessToken = try createAccessToken(userId: payload.userId)
 
       return accessToken
     } catch let error as JWTError {
@@ -116,7 +110,7 @@ class Auth {
     }
   }
 
-  private func createAccessToken(of userId: String) throws -> String {
+  private func createAccessToken(userId: String) throws -> String {
     let payload = TokenPayload(
       userId: userId,
       duration: Self.accessTokenExpirationTime
@@ -125,9 +119,9 @@ class Auth {
     return token
   }
 
-  private func createRefreshToken(of user: User) throws -> String {
+  private func createRefreshToken(userId: String) throws -> String {
     let refreshPayload = TokenPayload(
-      userId: try user.requireID().uuidString,
+      userId: userId,
       duration: Self.refreshTokenExpirationTime
     )
     let refreshToken = try jwt.sign(refreshPayload, kid: "refresh")
@@ -136,26 +130,26 @@ class Auth {
 
   func sendResetCode(email: String) async throws {
 
-    let user = try await User.query(on: database)
-      .filter(\.$email == email.lowercased())
-      .first()
-
-    guard let user else {
-      // Visitor has no way to check the email is associated to an user
-      self.logger.info("Email not associated to an user")
-      return
-    }
-
-    self.logger.info("Email associated to an user")
-
-    let randomInt = Int.random(in: 0..<999999)
-    let code = String(format: "%06d", randomInt)
-
-    let resetAttempt = try ResetAttempt(
-      userID: user.requireID(), email: email.lowercased(), code: code)
-    try await resetAttempt.save(on: self.database)
-
-    try await self.emailNotifications.sendRecoveryCode(to: email, code: code)
+    //    let user = try await User.query(on: database)
+    //      .filter(\.$email == email.lowercased())
+    //      .first()
+    //
+    //    guard let user else {
+    //      // Visitor has no way to check the email is associated to an user
+    //      self.logger.info("Email not associated to an user")
+    //      return
+    //    }
+    //
+    //    self.logger.info("Email associated to an user")
+    //
+    //    let randomInt = Int.random(in: 0..<999999)
+    //    let code = String(format: "%06d", randomInt)
+    //
+    //    let resetAttempt = try ResetAttempt(
+    //      userID: user.requireID(), email: email.lowercased(), code: code)
+    //    try await resetAttempt.save(on: self.database)
+    //
+    //    try await self.emailNotifications.sendRecoveryCode(to: email, code: code)
   }
 
 }

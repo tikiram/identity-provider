@@ -64,7 +64,6 @@ public func configure(_ app: Application) async throws {
   app.jwt.signers.use(.hs256(key: REFRESH_KEY), kid: "refresh")
   // TODO: use RS256 key
 
-
   if app.environment == .production {
     var tlsConfig: TLSConfiguration = .makeClientConfiguration()
     tlsConfig.certificateVerification = .none

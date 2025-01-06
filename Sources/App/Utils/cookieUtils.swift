@@ -1,4 +1,3 @@
-
 import Vapor
 
 func getIndicatorCookie(_ cookie: HTTPCookies.Value) -> HTTPCookies.Value {
@@ -6,7 +5,7 @@ func getIndicatorCookie(_ cookie: HTTPCookies.Value) -> HTTPCookies.Value {
   let indicatorCookie = HTTPCookies.Value(
     string: "true",
     expires: cookie.expires,
-//    isSecure: cookie.isSecure,
+    //    isSecure: cookie.isSecure,
     isSecure: false,
     isHTTPOnly: false,
     sameSite: cookie.sameSite

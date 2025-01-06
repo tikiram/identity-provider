@@ -10,8 +10,8 @@ struct TokenPayload: JWTPayload, Authenticatable, Content {
   let subject: SubjectClaim
   let expiration: ExpirationClaim
 
-  var userId: UUID {
-    UUID(uuidString: subject.value)!
+  var userId: String {
+    return subject.value
   }
 
   init(userId: String, duration: TimeInterval) {
