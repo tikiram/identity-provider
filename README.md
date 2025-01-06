@@ -16,6 +16,9 @@ https://docs.vapor.codes/getting-started/xcode/
 
 Set env access and secret key
 
+- `.env` file (for Xcode)
+- `~/.zshrc` file (for terraform)
+
 #### Terraform
 
 https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
