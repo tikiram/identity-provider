@@ -7,7 +7,7 @@ POST {{host}}/auth/register
 Content-Type: application/json
 
 {
-  "username": "test3@test.com",
+  "username": "test@test.com",
   "password": "test"
 }
 

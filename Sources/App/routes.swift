@@ -11,7 +11,6 @@ func routes(_ app: Application) throws {
   }
 
   //  try app.grouped(app.sessions.middleware).register(collection: AuthControler())
-  try app.register(collection: PlaygroundController())
   try app.register(collection: AuthControler())
 
   let secure =

@@ -9,7 +9,7 @@ class UserRepo {
 
   init(_ client: DynamoDBClient, tableNamePrefix: String) {
     self.client = client
-    
+
     self.userTableName = tableNamePrefix + "auth_user"
     self.userEmailMethodTableName = tableNamePrefix + "auth_user_email_method"
   }
@@ -29,22 +29,21 @@ class UserRepo {
     )
     let item1 = DynamoDBClientTypes.TransactWriteItem(put: put1)
 
-    
     let put2 = DynamoDBClientTypes.Put(
       conditionExpression: "attribute_not_exists(email)",
       item: [
         "email": .s(serializedEmail),
         "passwordHash": .s(passwordHash),
         "createdAt": .n(nowMS().description),
-        "userId": .s(uniqueID)
+        "userId": .s(uniqueID),
       ],
       tableName: self.userEmailMethodTableName
     )
     let item2 = DynamoDBClientTypes.TransactWriteItem(put: put2)
-    
-    let input = TransactWriteItemsInput(transactItems: [item1, item2])
-    let output = try await client.transactWriteItems(input: input)
-    
+
+    let input = TransactWriteItemsInput(transactItems: [item2, item1])
+    let _ = try await client.transactWriteItems(input: input)
+
     let user = User(id: uniqueID)
     return user
   }
@@ -55,17 +54,17 @@ class UserRepo {
     let input = GetItemInput(
       consistentRead: true,
       key: [
-        "email": .s(serializedEmail),
+        "email": .s(serializedEmail)
       ],
       tableName: self.userEmailMethodTableName
     )
-    
+
     let output = try await client.getItem(input: input)
-    
+
     guard let item = output.item else {
       return nil
     }
-    
+
     return try UserEmailMethod(item)
   }
 }

@@ -1,3 +1,4 @@
+import AWSDynamoDB
 import Fluent
 import JWTKit
 import Vapor
@@ -38,20 +39,16 @@ class Auth {
   }
 
   func register(email: String, password: String?) async throws -> Tokens {
-
-    //    do {
-    let user = try await userRepo.create(email: email, password: password!)
-    
-    // TODO: add this validation for DynamoDB
-    //    } catch let error as PSQLError where error.isConstraintFailure {
-    //      throw AuthError.emailAlreadyUsed
-    //    }
-
-    return try await createTokens(userId: user.id)
+    do {
+      let user = try await userRepo.create(email: email, password: password!)
+      return try await createTokens(userId: user.id)
+    } catch let error as TransactionCanceledException where hasConditionalCheckFailed(error) {
+      throw AuthError.emailAlreadyUsed
+    }
   }
 
   func authenticate(email: String, password: String) async throws -> Tokens {
-    
+
     let userEmailMethod = try await userRepo.getEmailMethod(email)
 
     guard let userEmailMethod else {

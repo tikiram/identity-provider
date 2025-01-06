@@ -2,7 +2,7 @@ import AWSDynamoDB
 
 struct User {
   let id: String
-  
+
   init(id: String) {
     self.id = id
   }

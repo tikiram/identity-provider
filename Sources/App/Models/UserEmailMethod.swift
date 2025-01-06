@@ -4,7 +4,7 @@ struct UserEmailMethod {
   let email: String
   let passwordHash: String
   let userId: String
-  
+
   init(_ attributes: [String: DynamoDBClientTypes.AttributeValue]?) throws {
     guard let attributes else {
       throw RuntimeError("attributes is null")
