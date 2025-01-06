@@ -1,5 +1,4 @@
 import AWSDynamoDB
-import Fluent
 import JWTKit
 import Vapor
 
@@ -21,7 +20,6 @@ class Auth {
   static let accessTokenExpirationTime: TimeInterval = 60 * 60  // 1h
   static let refreshTokenExpirationTime: TimeInterval = 60 * 60 * 24  // 1d
 
-  private let database: Database
   private let jwt: Request.JWT
   private let emailNotifications: EmailNotifications
   private let logger: Logger
@@ -30,10 +28,10 @@ class Auth {
   private let userRepo: UserRepo
 
   init(_ req: Request) async throws {
-    self.database = req.db
     self.jwt = req.jwt
     self.emailNotifications = try req.emailNotifications
     self.logger = req.logger
+    // TODO: get the prefix value from the env config files (?) maybe I can use the env directly
     self.sessionRepo = try await SessionRepo(req.dynamoDBClient, tableNamePrefix: "dev_")
     self.userRepo = try await UserRepo(req.dynamoDBClient, tableNamePrefix: "dev_")
   }

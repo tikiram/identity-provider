@@ -1,5 +1,3 @@
-import Fluent
-import Vapor
 
 final class Session {
   //  static let schema = "session"
