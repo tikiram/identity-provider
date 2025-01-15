@@ -1,5 +1,5 @@
 import Foundation
 
-func nowMS() -> Double {
-  return (Date().timeIntervalSince1970 * 1000)
+func nowMS() -> Int {
+  return Int(Date().timeIntervalSince1970 * 1000)
 }

@@ -52,7 +52,7 @@ class UserRepo {
     let serializedEmail = email.trim().lowercased()
 
     let input = GetItemInput(
-      consistentRead: true,
+      consistentRead: false,
       key: [
         "email": .s(serializedEmail)
       ],
