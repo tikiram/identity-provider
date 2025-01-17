@@ -1,4 +1,5 @@
 import AWSDynamoDB
+import SharedBackend
 
 struct UserEmailMethod {
   let email: String

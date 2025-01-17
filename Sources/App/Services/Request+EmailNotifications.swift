@@ -1,4 +1,5 @@
 import Sendgrid
+import SharedBackend
 import Vapor
 
 struct SendGridConfiguration {

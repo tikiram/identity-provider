@@ -10,8 +10,8 @@ class UserRepo {
   init(_ client: DynamoDBClient, tableNamePrefix: String) {
     self.client = client
 
-    self.userTableName = tableNamePrefix + "auth_user"
-    self.userEmailMethodTableName = tableNamePrefix + "auth_user_email_method"
+    self.userTableName = tableNamePrefix + "user"
+    self.userEmailMethodTableName = tableNamePrefix + "user_email_method"
   }
 
   func create(email: String, password: String) async throws -> User {
@@ -23,7 +23,7 @@ class UserRepo {
       conditionExpression: "attribute_not_exists(id)",
       item: [
         "id": .s(uniqueID),
-        "createdAt": .n(nowMS().description),
+        "createdAt": .n(Date().millisecondsSince1970.description),
       ],
       tableName: self.userTableName
     )
@@ -34,7 +34,7 @@ class UserRepo {
       item: [
         "email": .s(serializedEmail),
         "passwordHash": .s(passwordHash),
-        "createdAt": .n(nowMS().description),
+        "createdAt": .n(Date().millisecondsSince1970.description),
         "userId": .s(uniqueID),
       ],
       tableName: self.userEmailMethodTableName

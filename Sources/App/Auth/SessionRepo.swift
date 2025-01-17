@@ -1,6 +1,6 @@
 import AWSDynamoDB
-import Vapor
 import CryptoKit
+import Vapor
 
 class SessionRepo {
 
@@ -8,16 +8,16 @@ class SessionRepo {
   private let tableName: String
 
   init(_ client: DynamoDBClient, tableNamePrefix: String) {
-    self.tableName = tableNamePrefix + "auth_session"
+    self.tableName = tableNamePrefix + "session"
     self.client = client
   }
 
   func save(userId: String, sessionSubId: String, refreshToken: String) async throws {
-
     let refreshTokenHash = generateSHA256(from: refreshToken)
 
+    // TODO: save ip, region and other related data, this can help to detect stolen refreshTokens
     let session = Session(userId: userId, subId: sessionSubId, refreshTokenHash: refreshTokenHash)
-    
+
     let input = PutItemInput(
       conditionExpression: "attribute_not_exists(subId)",
       item: session.item(),
@@ -27,7 +27,7 @@ class SessionRepo {
   }
 
   func getIsValid(userId: String, sessionSubId: String, refreshToken: String) async throws -> Bool {
-    
+
     let sessionId = SessionId(userId, sessionSubId)
 
     let input = GetItemInput(
@@ -40,11 +40,11 @@ class SessionRepo {
     guard let item = output.item else {
       return false
     }
-    
+
     let session = try Session(item)
-    
+
     let refreshTokenHash = generateSHA256(from: refreshToken)
-    
+
     return session.refreshTokenHash == refreshTokenHash
   }
 
@@ -54,7 +54,7 @@ class SessionRepo {
     let expression = "SET refreshTokenHash = :x, lastAccessedAt = :y"
     let expressionAttributeValues: [String: DynamoDBClientTypes.AttributeValue] = [
       ":x": .s(refreshTokenHash),
-      ":y": .n(Date().millisecondsSince1970.description)
+      ":y": .n(Date().millisecondsSince1970.description),
     ]
 
     let input = UpdateItemInput(
@@ -67,7 +67,7 @@ class SessionRepo {
 
     let _ = try await client.updateItem(input: input)
   }
-  
+
   func delete(userId: String, sessionSubId: String) async throws {
     let input = DeleteItemInput(
       key: SessionId(userId, sessionSubId).key(),

@@ -1,4 +1,5 @@
 import AWSDynamoDB
+import SharedBackend
 
 struct User {
   let id: String

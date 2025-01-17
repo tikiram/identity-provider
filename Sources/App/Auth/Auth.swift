@@ -10,7 +10,7 @@ struct Tokens {
 enum AuthError: Error {
   case jwtError(JWTError)
   case tokenNotFound
-  case notValidToken // TODO: remove this
+  case notValidToken  // TODO: remove this
   case invalidToken
   case emailAlreadyUsed
   case userHasNoPassword
@@ -32,9 +32,9 @@ class Auth {
     self.jwt = req.jwt
     self.emailNotifications = try req.emailNotifications
     self.logger = req.logger
-    // TODO: get the prefix value from the env config files (?) maybe I can use the env directly
-    self.sessionRepo = try await SessionRepo(req.dynamoDBClient, tableNamePrefix: "dev_")
-    self.userRepo = try await UserRepo(req.dynamoDBClient, tableNamePrefix: "dev_")
+
+    self.sessionRepo = try await req.sessionRepo
+    self.userRepo = try await req.userRepo
   }
 
   func register(email: String, password: String?) async throws -> Tokens {
@@ -66,21 +66,24 @@ class Auth {
 
   private func createTokensForNewSession(userId: String) async throws -> Tokens {
     let accessToken = try createAccessToken(userId: userId)
-    
+
     let sessionSubId = UUID().uuidString
     let refreshToken = try createRefreshToken(userId: userId, sessionSubId: sessionSubId)
 
-    try await self.sessionRepo.save(userId: userId, sessionSubId: sessionSubId, refreshToken: refreshToken)
+    try await self.sessionRepo.save(
+      userId: userId, sessionSubId: sessionSubId, refreshToken: refreshToken)
 
     return Tokens(accessToken: accessToken, refreshToken: refreshToken)
   }
-  
+
   private func rotateTokensWithPayload(_ payload: RefreshTokenPayload) async throws -> Tokens {
     let accessToken = try createAccessToken(userId: payload.userId)
-    let refreshToken = try createRefreshToken(userId: payload.userId, sessionSubId: payload.sessionSubId)
-    
-    try await self.sessionRepo.update(userId: payload.userId, sessionSubId: payload.sessionSubId, refreshToken: refreshToken)
-    
+    let refreshToken = try createRefreshToken(
+      userId: payload.userId, sessionSubId: payload.sessionSubId)
+
+    try await self.sessionRepo.update(
+      userId: payload.userId, sessionSubId: payload.sessionSubId, refreshToken: refreshToken)
+
     return Tokens(accessToken: accessToken, refreshToken: refreshToken)
   }
 
@@ -101,8 +104,10 @@ class Auth {
     let tokens = try await rotateTokensWithPayload(payload)
     return tokens
   }
-  
-  func getRefreshTokenPayloadRelatedToValidSession(_ refreshToken: String) async throws -> RefreshTokenPayload {
+
+  func getRefreshTokenPayloadRelatedToValidSession(_ refreshToken: String) async throws
+    -> RefreshTokenPayload
+  {
     let payload = try jwt.verify(refreshToken, as: RefreshTokenPayload.self)
 
     let isValid = try await sessionRepo.getIsValid(

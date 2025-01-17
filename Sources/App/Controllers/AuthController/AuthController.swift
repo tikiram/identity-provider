@@ -57,7 +57,7 @@ struct AuthControler: RouteCollection {
   private func tokenHandler(_ req: Request) async throws -> Response {
     try TokensPayload.validate(content: req)
     let tokensPayload = try req.content.decode(TokensPayload.self)
-    
+
     print(tokensPayload.grantType)
     switch tokensPayload.grantType {
     case .password:
@@ -104,7 +104,7 @@ struct AuthControler: RouteCollection {
 
     let tokens = try await Auth(req)
       .rotateTokenUsingRefreshToken(refreshTokenCookie.string)
-    
+
     return try handleTokens(req, tokens)
   }
 }

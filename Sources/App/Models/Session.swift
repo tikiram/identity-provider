@@ -2,7 +2,6 @@ import AWSDynamoDB
 import Foundation
 import SharedBackend
 
-
 struct SessionId {
   let userId: String
   let subId: String
@@ -39,7 +38,7 @@ struct Session {
     self.createdAt = Date()
     self.lastAccessedAt = Date()
   }
-  
+
   init(_ attributes: [String: DynamoDBClientTypes.AttributeValue]?) throws {
     guard let attributes else {
       throw RuntimeError("attributes is null")
@@ -50,7 +49,7 @@ struct Session {
     self.createdAt = try getDateFromAttribute(attributes["createdAt"])
     self.lastAccessedAt = try getDateFromAttribute(attributes["lastAccessedAt"])
   }
-  
+
   func item() -> [String: DynamoDBClientTypes.AttributeValue] {
     return [
       "userId": .s(userId),

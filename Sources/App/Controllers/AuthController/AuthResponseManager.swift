@@ -15,7 +15,7 @@ class AuthResponseManager {
 
     // TODO: this is the only required line but currently vapor still has no support for Partitioned attribute
     //response.cookies["refreshToken"] = cookie
-    
+
     let cookieValue = cookie.serialize(name: "refreshToken")
 
     response.headers.add(
@@ -23,7 +23,6 @@ class AuthResponseManager {
       value: "\(cookieValue); Partitioned"
     )
 
-    
   }
 
   private func createRefreshTokenCookie(value: String, expirationTime: TimeInterval)
