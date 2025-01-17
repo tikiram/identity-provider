@@ -1,5 +1,6 @@
 import AWSDynamoDB
 import Vapor
+import CryptoKit
 
 class SessionRepo {
 
@@ -11,30 +12,26 @@ class SessionRepo {
     self.client = client
   }
 
-  func save(userId: String, refreshToken: String) async throws {
+  func save(userId: String, sessionSubId: String, refreshToken: String) async throws {
 
-    let refreshTokenHash = try Bcrypt.hash(refreshToken)
+    let refreshTokenHash = generateSHA256(from: refreshToken)
 
+    let session = Session(userId: userId, subId: sessionSubId, refreshTokenHash: refreshTokenHash)
+    
     let input = PutItemInput(
-      conditionExpression: "attribute_not_exists(refreshTokenHash)",
-      item: [
-        "userId": .s(userId),
-        "refreshTokenHash": .s(refreshTokenHash),
-        "createdAt": .n(nowMS().description),
-      ],
+      conditionExpression: "attribute_not_exists(subId)",
+      item: session.item(),
       tableName: self.tableName
     )
     let _ = try await client.putItem(input: input)
   }
 
-  func getIsValid(userId: String, refreshToken: String) async throws -> Bool {
-    let refreshTokenHash = try Bcrypt.hash(refreshToken)
+  func getIsValid(userId: String, sessionSubId: String, refreshToken: String) async throws -> Bool {
+    
+    let sessionId = SessionId(userId, sessionSubId)
 
     let input = GetItemInput(
-      key: [
-        "userId": .s(userId),
-        "refreshTokenHash": .s(refreshTokenHash),
-      ],
+      key: sessionId.key(),
       tableName: self.tableName
     )
 
@@ -43,33 +40,41 @@ class SessionRepo {
     guard let item = output.item else {
       return false
     }
-
-    guard item["deletedAt"] == nil else {
-      return false
-    }
-
-    return true
+    
+    let session = try Session(item)
+    
+    let refreshTokenHash = generateSHA256(from: refreshToken)
+    
+    return session.refreshTokenHash == refreshTokenHash
   }
 
-  func softDelete(userId: String, refreshToken: String) async throws {
-    let refreshTokenHash = try Bcrypt.hash(refreshToken)
+  func update(userId: String, sessionSubId: String, refreshToken: String) async throws {
+    let refreshTokenHash = generateSHA256(from: refreshToken)
 
-    let expression = "SET deletedAt = :deletedAt"
+    let expression = "SET refreshTokenHash = :x, lastAccessedAt = :y"
     let expressionAttributeValues: [String: DynamoDBClientTypes.AttributeValue] = [
-      ":deletedAt": .n(nowMS().description)
+      ":x": .s(refreshTokenHash),
+      ":y": .n(Date().millisecondsSince1970.description)
     ]
 
     let input = UpdateItemInput(
-      conditionExpression: "attribute_exists(refreshTokenHash)",
+      conditionExpression: "attribute_exists(subId)",
       expressionAttributeValues: expressionAttributeValues,
-      key: [
-        "userId": .s(userId),
-        "refreshTokenHash": .s(refreshTokenHash),
-      ],
+      key: SessionId(userId, sessionSubId).key(),
       tableName: self.tableName,
       updateExpression: expression
     )
 
     let _ = try await client.updateItem(input: input)
+  }
+  
+  func delete(userId: String, sessionSubId: String) async throws {
+    let input = DeleteItemInput(
+      key: SessionId(userId, sessionSubId).key(),
+      tableName: self.tableName
+    )
+    _ = try await client.deleteItem(input: input)
+
+    // we can implement soft delete (if required) by saving deleted item in another table
   }
 }

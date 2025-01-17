@@ -1,5 +1,5 @@
 {
-  "originHash" : "b7719e6b3135a316c7c41ac18c428325e9b5a51e409965db4cec085aaa484db3",
+  "originHash" : "4d1525aa072264fb40f314e86dc744463d5069f15df987bccd265fc979d3e4b3",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -80,6 +80,15 @@
       "state" : {
         "revision" : "2a92a7eac411a82fb3a03731be5e76773ebe1b3e",
         "version" : "4.9.0"
+      }
+    },
+    {
+      "identity" : "shared-be-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "git@github.com:equanimousoft-1/shared-be-swift.git",
+      "state" : {
+        "revision" : "4aadbaaf01535073f9f9b6411b986d7e30f7efe2",
+        "version" : "0.2.0"
       }
     },
     {

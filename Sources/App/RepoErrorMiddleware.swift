@@ -13,13 +13,16 @@ struct RepoErrorMiddleware: AsyncMiddleware {
         throw Abort(.unauthorized, reason: "INVALID_CREDENTIALS")
       case .tokenNotFound:
         throw Abort(.unauthorized, reason: "INVALID_TOKEN")
-      case .notValidToken:
+      case .notValidToken, .invalidToken:
         throw Abort(.unauthorized, reason: "INVALID_TOKEN")
       case .userHasNoPassword:
         throw Abort(.unauthorized, reason: "USER_HAS_NO_PASSWORD")
       case .jwtError(_):
         throw error
       }
+    } catch {
+      print(error)
+      throw error
     }
   }
 }

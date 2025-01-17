@@ -10,7 +10,8 @@ struct Tokens {
 enum AuthError: Error {
   case jwtError(JWTError)
   case tokenNotFound
-  case notValidToken
+  case notValidToken // TODO: remove this
+  case invalidToken
   case emailAlreadyUsed
   case userHasNoPassword
   case invalidCredentials
@@ -39,7 +40,7 @@ class Auth {
   func register(email: String, password: String?) async throws -> Tokens {
     do {
       let user = try await userRepo.create(email: email, password: password!)
-      return try await createTokens(userId: user.id)
+      return try await createTokensForNewSession(userId: user.id)
     } catch let error as TransactionCanceledException where hasConditionalCheckFailed(error) {
       throw AuthError.emailAlreadyUsed
     }
@@ -60,25 +61,35 @@ class Auth {
       throw AuthError.invalidCredentials
     }
 
-    return try await createTokens(userId: userEmailMethod.userId)
+    return try await createTokensForNewSession(userId: userEmailMethod.userId)
   }
 
-  private func createTokens(userId: String) async throws -> Tokens {
+  private func createTokensForNewSession(userId: String) async throws -> Tokens {
     let accessToken = try createAccessToken(userId: userId)
-    let refreshToken = try createRefreshToken(userId: userId)
+    
+    let sessionSubId = UUID().uuidString
+    let refreshToken = try createRefreshToken(userId: userId, sessionSubId: sessionSubId)
 
-    try await self.sessionRepo.save(userId: userId, refreshToken: refreshToken)
+    try await self.sessionRepo.save(userId: userId, sessionSubId: sessionSubId, refreshToken: refreshToken)
 
     return Tokens(accessToken: accessToken, refreshToken: refreshToken)
   }
-
-  func logout(refreshToken: String) async throws {
-    let payload = try jwt.verify(refreshToken, as: TokenPayload.self)
-    try await self.sessionRepo.softDelete(
-      userId: payload.userId, refreshToken: refreshToken)
+  
+  private func rotateTokensWithPayload(_ payload: RefreshTokenPayload) async throws -> Tokens {
+    let accessToken = try createAccessToken(userId: payload.userId)
+    let refreshToken = try createRefreshToken(userId: payload.userId, sessionSubId: payload.sessionSubId)
+    
+    try await self.sessionRepo.update(userId: payload.userId, sessionSubId: payload.sessionSubId, refreshToken: refreshToken)
+    
+    return Tokens(accessToken: accessToken, refreshToken: refreshToken)
   }
 
-  func getNewAccessToken(refreshToken: String) async throws -> String {
+  func logout(_ refreshToken: String) async throws {
+    let payload = try await getRefreshTokenPayloadRelatedToValidSession(refreshToken)
+    try await self.sessionRepo.delete(userId: payload.userId, sessionSubId: payload.sessionSubId)
+  }
+
+  func rotateTokenUsingRefreshToken(_ refreshToken: String) async throws -> Tokens {
 
     // TODO: detect stolen refreshToken, a token should only be re-used
     // after access-token expiration time
@@ -86,23 +97,21 @@ class Auth {
     // TODO: check these suggestions
     // https://stackoverflow.com/questions/59511628/is-it-secure-to-store-a-refresh-token-in-the-database-to-issue-new-access-toke
 
-    do {
-      let payload = try jwt.verify(refreshToken, as: TokenPayload.self)
+    let payload = try await getRefreshTokenPayloadRelatedToValidSession(refreshToken)
+    let tokens = try await rotateTokensWithPayload(payload)
+    return tokens
+  }
+  
+  func getRefreshTokenPayloadRelatedToValidSession(_ refreshToken: String) async throws -> RefreshTokenPayload {
+    let payload = try jwt.verify(refreshToken, as: RefreshTokenPayload.self)
 
-      let isValid = try await sessionRepo.getIsValid(
-        userId: payload.userId, refreshToken: refreshToken)
+    let isValid = try await sessionRepo.getIsValid(
+      userId: payload.userId, sessionSubId: payload.sessionSubId, refreshToken: refreshToken)
 
-      guard isValid else {
-        throw AuthError.tokenNotFound
-      }
-
-      // TODO: create access token based on the content of the refreshToken
-      let accessToken = try createAccessToken(userId: payload.userId)
-
-      return accessToken
-    } catch let error as JWTError {
-      throw AuthError.jwtError(error)
+    guard isValid else {
+      throw AuthError.invalidToken
     }
+    return payload
   }
 
   private func createAccessToken(userId: String) throws -> String {
@@ -114,10 +123,11 @@ class Auth {
     return token
   }
 
-  private func createRefreshToken(userId: String) throws -> String {
-    let refreshPayload = TokenPayload(
+  private func createRefreshToken(userId: String, sessionSubId: String) throws -> String {
+    let refreshPayload = RefreshTokenPayload(
       userId: userId,
-      duration: Self.refreshTokenExpirationTime
+      duration: Self.refreshTokenExpirationTime,
+      sessionSubId: sessionSubId
     )
     let refreshToken = try jwt.sign(refreshPayload, kid: "refresh")
     return refreshToken

@@ -55,7 +55,7 @@ resource "aws_dynamodb_table" "session" {
   billing_mode = "PAY_PER_REQUEST"
 
   hash_key  = "userId"
-  range_key = "refreshTokenHash"
+  range_key = "subId"
 
   attribute {
     name = "userId"
@@ -63,7 +63,7 @@ resource "aws_dynamodb_table" "session" {
   }
 
   attribute {
-    name = "refreshTokenHash"
+    name = "subId"
     type = "S"
   }
 }

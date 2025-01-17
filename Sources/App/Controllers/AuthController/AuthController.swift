@@ -33,7 +33,7 @@ struct AuthControler: RouteCollection {
     }
 
     try await Auth(req)
-      .logout(refreshToken: refreshTokenCookie.string)
+      .logout(refreshTokenCookie.string)
 
     let response = Response(status: .noContent)
     AuthResponseManager(response)
@@ -57,6 +57,8 @@ struct AuthControler: RouteCollection {
   private func tokenHandler(_ req: Request) async throws -> Response {
     try TokensPayload.validate(content: req)
     let tokensPayload = try req.content.decode(TokensPayload.self)
+    
+    print(tokensPayload.grantType)
     switch tokensPayload.grantType {
     case .password:
       return try await passwordGrandTypeHandler(req)
@@ -96,35 +98,14 @@ struct AuthControler: RouteCollection {
   }
 
   private func refreshTokenGrandTypeHandler(_ req: Request) async throws -> Response {
-
     guard let refreshTokenCookie = req.cookies["refreshToken"] else {
       throw Abort(.unauthorized, reason: "Missing refresh token")
     }
 
-    // TODO: we should rotate also the refresh token here
-    // This means a new accessToken and refreshToken will be generated
-
-    do {
-      let accessToken = try await Auth(req)
-        .getNewAccessToken(refreshToken: refreshTokenCookie.string)
-
-      let tokensResponse = TokensResponse(
-        accessToken: accessToken,
-        expiresIn: Auth.accessTokenExpirationTime
-      )
-
-      let response = Response()
-      try response.content.encode(tokensResponse, as: .json)
-      return response
-    } catch let error as AuthError {
-      let payload = GenericErrorPayload(reason: error.localizedDescription)
-      let response = Response(status: .unauthorized)
-      try response.content.encode(payload, as: .json)
-      AuthResponseManager(response)
-        .setRefreshTokenCookie("", expirationTime: 0)
-      return response
-    }
-
+    let tokens = try await Auth(req)
+      .rotateTokenUsingRefreshToken(refreshTokenCookie.string)
+    
+    return try handleTokens(req, tokens)
   }
 }
 
