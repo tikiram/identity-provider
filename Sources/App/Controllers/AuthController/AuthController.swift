@@ -28,7 +28,7 @@ struct AuthControler: RouteCollection {
     // try RefreshTokenGrantTypePayload.validate(content: req)
     // let payload = try req.content.decode(RefreshTokenGrantTypePayload.self)
 
-    guard let refreshTokenCookie = req.cookies["refreshToken"] else {
+    guard let refreshTokenCookie = req.cookies[REFRESH_TOKEN_COOKIE_NAME] else {
       throw Abort(.unauthorized, reason: "Missing refresh token")
     }
 
@@ -98,12 +98,12 @@ struct AuthControler: RouteCollection {
   }
 
   private func refreshTokenGrandTypeHandler(_ req: Request) async throws -> Response {
-    guard let refreshTokenCookie = req.cookies["refreshToken"] else {
+    guard let refreshTokenCookie = req.cookies[REFRESH_TOKEN_COOKIE_NAME] else {
       throw Abort(.unauthorized, reason: "Missing refresh token")
     }
 
     let tokens = try await Auth(req)
-      .rotateTokenUsingRefreshToken(refreshTokenCookie.string)
+      .rotateTokens(refreshTokenCookie.string)
 
     return try handleTokens(req, tokens)
   }

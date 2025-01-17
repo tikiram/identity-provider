@@ -26,39 +26,19 @@ class SessionRepo {
     let _ = try await client.putItem(input: input)
   }
 
-  func getIsValid(userId: String, sessionSubId: String, refreshToken: String) async throws -> Bool {
-
-    let sessionId = SessionId(userId, sessionSubId)
-
-    let input = GetItemInput(
-      key: sessionId.key(),
-      tableName: self.tableName
-    )
-
-    let output = try await client.getItem(input: input)
-
-    guard let item = output.item else {
-      return false
-    }
-
-    let session = try Session(item)
-
-    let refreshTokenHash = generateSHA256(from: refreshToken)
-
-    return session.refreshTokenHash == refreshTokenHash
-  }
-
-  func update(userId: String, sessionSubId: String, refreshToken: String) async throws {
-    let refreshTokenHash = generateSHA256(from: refreshToken)
+  func update(userId: String, sessionSubId: String, newRefreshToken: String, previousRefreshToken: String) async throws {
+    let previousHash = generateSHA256(from: previousRefreshToken)
+    let refreshTokenHash = generateSHA256(from: newRefreshToken)
 
     let expression = "SET refreshTokenHash = :x, lastAccessedAt = :y"
     let expressionAttributeValues: [String: DynamoDBClientTypes.AttributeValue] = [
       ":x": .s(refreshTokenHash),
       ":y": .n(Date().millisecondsSince1970.description),
+      ":previousHash": .s(previousHash)
     ]
 
     let input = UpdateItemInput(
-      conditionExpression: "attribute_exists(subId)",
+      conditionExpression: "refreshTokenHash = :previousHash AND attribute_not_exists(loggedOutAt)",
       expressionAttributeValues: expressionAttributeValues,
       key: SessionId(userId, sessionSubId).key(),
       tableName: self.tableName,
@@ -68,13 +48,23 @@ class SessionRepo {
     let _ = try await client.updateItem(input: input)
   }
 
-  func delete(userId: String, sessionSubId: String) async throws {
-    let input = DeleteItemInput(
-      key: SessionId(userId, sessionSubId).key(),
-      tableName: self.tableName
-    )
-    _ = try await client.deleteItem(input: input)
+  func delete(userId: String, sessionSubId: String, refreshToken: String) async throws {
+    let previousHash = generateSHA256(from: refreshToken)
 
-    // we can implement soft delete (if required) by saving deleted item in another table
+    let expression = "SET loggedOutAt = :x"
+    let expressionAttributeValues: [String: DynamoDBClientTypes.AttributeValue] = [
+      ":previousHash": .s(previousHash),
+      ":x": .n(Date().millisecondsSince1970.description)
+    ]
+
+    let input = UpdateItemInput(
+      conditionExpression: "refreshTokenHash = :previousHash AND attribute_not_exists(loggedOutAt)",
+      expressionAttributeValues: expressionAttributeValues,
+      key: SessionId(userId, sessionSubId).key(),
+      tableName: self.tableName,
+      updateExpression: expression
+    )
+
+    let _ = try await client.updateItem(input: input)
   }
 }

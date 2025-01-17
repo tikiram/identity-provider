@@ -30,6 +30,7 @@ struct Session {
   let refreshTokenHash: String
   let createdAt: Date
   let lastAccessedAt: Date
+  let loggedOutAt: Date?
 
   init(userId: String, subId: String, refreshTokenHash: String) {
     self.userId = userId
@@ -37,6 +38,7 @@ struct Session {
     self.refreshTokenHash = refreshTokenHash
     self.createdAt = Date()
     self.lastAccessedAt = Date()
+    self.loggedOutAt = nil
   }
 
   init(_ attributes: [String: DynamoDBClientTypes.AttributeValue]?) throws {
@@ -48,15 +50,22 @@ struct Session {
     self.refreshTokenHash = try getStringFromAttribute(attributes["refreshTokenHash"])
     self.createdAt = try getDateFromAttribute(attributes["createdAt"])
     self.lastAccessedAt = try getDateFromAttribute(attributes["lastAccessedAt"])
+    self.loggedOutAt = try getOptionalDateFromAttribute(attributes["loggedOutAt"])
   }
 
   func item() -> [String: DynamoDBClientTypes.AttributeValue] {
-    return [
+    var attributes: [String: DynamoDBClientTypes.AttributeValue] = [
       "userId": .s(userId),
       "subId": .s(subId),
       "refreshTokenHash": .s(refreshTokenHash),
       "createdAt": .n(self.createdAt.millisecondsSince1970.description),
       "lastAccessedAt": .n(self.lastAccessedAt.millisecondsSince1970.description),
     ]
+    
+    if let loggedOutAt {
+      attributes["loggedOutAt"] = .n(loggedOutAt.millisecondsSince1970.description)
+    }
+    
+    return attributes
   }
 }

@@ -1,5 +1,8 @@
 import Vapor
 
+
+let REFRESH_TOKEN_COOKIE_NAME = "x_rtkn"
+
 class AuthResponseManager {
 
   private let response: Response
@@ -14,9 +17,9 @@ class AuthResponseManager {
       value: refreshToken, expirationTime: expirationTime)
 
     // TODO: this is the only required line but currently vapor still has no support for Partitioned attribute
-    //response.cookies["refreshToken"] = cookie
+    //response.cookies[REFRESH_TOKEN_COOKIE_NAME] = cookie
 
-    let cookieValue = cookie.serialize(name: "refreshToken")
+    let cookieValue = cookie.serialize(name: REFRESH_TOKEN_COOKIE_NAME)
 
     response.headers.add(
       name: .setCookie,

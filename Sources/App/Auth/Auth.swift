@@ -76,47 +76,42 @@ class Auth {
     return Tokens(accessToken: accessToken, refreshToken: refreshToken)
   }
 
-  private func rotateTokensWithPayload(_ payload: RefreshTokenPayload) async throws -> Tokens {
+  public func rotateTokens(_ refreshToken: String) async throws -> Tokens {
+    // TODO: detect stolen refreshToken
+
+    // https://stackoverflow.com/questions/59511628/is-it-secure-to-store-a-refresh-token-in-the-database-to-issue-new-access-toke
+    
+    let payload = try jwt.verify(refreshToken, as: RefreshTokenPayload.self)
+    
     let accessToken = try createAccessToken(userId: payload.userId)
-    let refreshToken = try createRefreshToken(
+    let newRefreshToken = try createRefreshToken(
       userId: payload.userId, sessionSubId: payload.sessionSubId)
-
-    try await self.sessionRepo.update(
-      userId: payload.userId, sessionSubId: payload.sessionSubId, refreshToken: refreshToken)
-
-    return Tokens(accessToken: accessToken, refreshToken: refreshToken)
+    
+    do {
+      try await self.sessionRepo.update(
+        userId: payload.userId,
+        sessionSubId: payload.sessionSubId,
+        newRefreshToken: newRefreshToken,
+        previousRefreshToken: refreshToken
+      )
+      return Tokens(accessToken: accessToken, refreshToken: newRefreshToken)
+    }
+    catch let error as ConditionalCheckFailedException {
+      // TODO: append error information to AuthError.invalidToken
+      throw AuthError.invalidToken
+    }
   }
 
   func logout(_ refreshToken: String) async throws {
-    let payload = try await getRefreshTokenPayloadRelatedToValidSession(refreshToken)
-    try await self.sessionRepo.delete(userId: payload.userId, sessionSubId: payload.sessionSubId)
-  }
-
-  func rotateTokenUsingRefreshToken(_ refreshToken: String) async throws -> Tokens {
-
-    // TODO: detect stolen refreshToken, a token should only be re-used
-    // after access-token expiration time
-
-    // TODO: check these suggestions
-    // https://stackoverflow.com/questions/59511628/is-it-secure-to-store-a-refresh-token-in-the-database-to-issue-new-access-toke
-
-    let payload = try await getRefreshTokenPayloadRelatedToValidSession(refreshToken)
-    let tokens = try await rotateTokensWithPayload(payload)
-    return tokens
-  }
-
-  func getRefreshTokenPayloadRelatedToValidSession(_ refreshToken: String) async throws
-    -> RefreshTokenPayload
-  {
     let payload = try jwt.verify(refreshToken, as: RefreshTokenPayload.self)
-
-    let isValid = try await sessionRepo.getIsValid(
-      userId: payload.userId, sessionSubId: payload.sessionSubId, refreshToken: refreshToken)
-
-    guard isValid else {
+    
+    do {
+      try await self.sessionRepo.delete(userId: payload.userId, sessionSubId: payload.sessionSubId, refreshToken: refreshToken)
+    }
+    catch let error as ConditionalCheckFailedException {
+      // TODO: append error information to AuthError.invalidToken
       throw AuthError.invalidToken
     }
-    return payload
   }
 
   private func createAccessToken(userId: String) throws -> String {
