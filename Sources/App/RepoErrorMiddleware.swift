@@ -3,6 +3,8 @@ import Vapor
 struct RepoErrorMiddleware: AsyncMiddleware {
   func respond(to request: Request, chainingTo next: AsyncResponder) async throws -> Response {
 
+    // TODO: check http codes related to invalid tokens
+    
     do {
       return try await next.respond(to: request)
     } catch let error as AuthError {

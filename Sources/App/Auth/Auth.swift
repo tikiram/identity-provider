@@ -18,6 +18,7 @@ enum AuthError: Error {
 }
 
 class Auth {
+  // TODO: get these values from env configuration
   static let accessTokenExpirationTime: TimeInterval = 60 * 60  // 1h
   static let refreshTokenExpirationTime: TimeInterval = 60 * 60 * 24  // 1d
 
