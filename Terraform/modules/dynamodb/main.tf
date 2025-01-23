@@ -1,19 +1,6 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-
-  required_version = ">= 1.2.0"
-}
-
-provider "aws" {
-}
 
 resource "aws_dynamodb_table" "user" {
-  name = "dev_auth_user"
+  name = "${var.table_name_prefix}_auth_user"
 
   billing_mode = "PAY_PER_REQUEST"
 
@@ -33,8 +20,8 @@ resource "aws_dynamodb_table" "user" {
   # }
 }
 
-resource "aws_dynamodb_table" "user_email" {
-  name         = "dev_auth_user_email_method"
+resource "aws_dynamodb_table" "user_email_method" {
+  name         = "${var.table_name_prefix}_auth_user_email_method"
   billing_mode = "PAY_PER_REQUEST"
 
   hash_key = "email"
@@ -49,8 +36,7 @@ resource "aws_dynamodb_table" "user_email" {
 }
 
 resource "aws_dynamodb_table" "session" {
-  // TODO: create reusable modules to create the same resources on different envs
-  name = "dev_auth_session"
+  name = "${var.table_name_prefix}_auth_session"
 
   billing_mode = "PAY_PER_REQUEST"
 

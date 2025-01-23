@@ -1,8 +1,8 @@
 import SharedBackend
 import Vapor
+import JWTKit
 
-let SECRET_KEY = Environment.get("SECRET_KEY")
-let REFRESH_KEY = Environment.get("REFRESH_KEY")
+let PRIVATE_KEY_STRING = Environment.get("PRIVATE_KEY_STRING")
 let SENDGRID_API_KEY = Environment.get("SENDGRID_API_KEY")
 
 enum EnvironmentValueError: Error {
@@ -10,11 +10,8 @@ enum EnvironmentValueError: Error {
 }
 
 public func configure(_ app: Application) async throws {
-  guard let SECRET_KEY else {
-    throw EnvironmentValueError.undefined("SECRET_KEY")
-  }
-  guard let REFRESH_KEY else {
-    throw EnvironmentValueError.undefined("REFRESH_KEY")
+  guard let PRIVATE_KEY_STRING else {
+    throw EnvironmentValueError.undefined("PRIVATE_KEY")
   }
 
   guard let SENDGRID_API_KEY else {
@@ -43,11 +40,12 @@ public func configure(_ app: Application) async throws {
   app.sendGridConfiguration = .init(apiKey: SENDGRID_API_KEY)
 
   setVaporWithCompanyStandardJSONEncoderDecoder()
+  
+  let pkey=PRIVATE_KEY_STRING.replacingOccurrences(of: "\\n", with: "\n")
+  
+  let privateKey = try ECDSAKey.private(pem: pkey)
 
-  // settign the JWT keys
-  app.jwt.signers.use(.hs256(key: SECRET_KEY), kid: "secret", isDefault: true)
-  app.jwt.signers.use(.hs256(key: REFRESH_KEY), kid: "refresh")
-  // TODO: use RS256 key
+  app.jwt.signers.use(.es256(key: privateKey), kid: "private", isDefault: true)
 
   // register routes
   try routes(app)

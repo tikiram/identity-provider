@@ -1,5 +1,5 @@
 {
-  "originHash" : "4d1525aa072264fb40f314e86dc744463d5069f15df987bccd265fc979d3e4b3",
+  "originHash" : "ec5671dd81cb4989e93b9f30c54691458040c78866fad677b8c206c062a56508",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -80,15 +80,6 @@
       "state" : {
         "revision" : "2a92a7eac411a82fb3a03731be5e76773ebe1b3e",
         "version" : "4.9.0"
-      }
-    },
-    {
-      "identity" : "shared-be-swift",
-      "kind" : "remoteSourceControl",
-      "location" : "git@github.com:equanimousoft-1/shared-be-swift.git",
-      "state" : {
-        "revision" : "4aadbaaf01535073f9f9b6411b986d7e30f7efe2",
-        "version" : "0.2.0"
       }
     },
     {
@@ -233,6 +224,15 @@
       "state" : {
         "revision" : "a4d7d4d32ef4a21dd10bc6375f4d20da3c5594e4",
         "version" : "4.105.2"
+      }
+    },
+    {
+      "identity" : "vapor-utils",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tikiram/vapor-utils.git",
+      "state" : {
+        "revision" : "4aadbaaf01535073f9f9b6411b986d7e30f7efe2",
+        "version" : "0.2.0"
       }
     },
     {

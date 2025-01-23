@@ -120,7 +120,7 @@ class Auth {
       userId: userId,
       duration: Self.accessTokenExpirationTime
     )
-    let token = try jwt.sign(payload)
+    let token = try jwt.sign(payload, kid: "private")
     return token
   }
 
@@ -130,7 +130,7 @@ class Auth {
       duration: Self.refreshTokenExpirationTime,
       sessionSubId: sessionSubId
     )
-    let refreshToken = try jwt.sign(refreshPayload, kid: "refresh")
+    let refreshToken = try jwt.sign(refreshPayload, kid: "private")
     return refreshToken
   }
 

@@ -51,3 +51,20 @@ swift run App serve
   - code generation
   - email notification
 - Support passwordless email
+
+
+## Public dev key
+
+```
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEO3i5iOrycaueq1KuTgK6W+LmpCeQ
+hRuWRFlixTkRETBbvvNnj/LkB40vMXl9fWn5WmmeCStla6qkZVC2bKuggg==
+-----END PUBLIC KEY-----
+
+```
+
+Key as env var
+
+```
+PUBLIC_KEY=-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEO3i5iOrycaueq1KuTgK6W+LmpCeQ\nhRuWRFlixTkRETBbvvNnj/LkB40vMXl9fWn5WmmeCStla6qkZVC2bKuggg==\n-----END PUBLIC KEY-----\n
+```

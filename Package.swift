@@ -14,7 +14,7 @@ let package = Package(
     // AWS
     .package(url: "https://github.com/awslabs/aws-sdk-swift", from: "1.0.69"),
     // Shared
-    .package(url: "git@github.com:equanimousoft-1/shared-be-swift.git", from: "0.2.0"),
+    .package(url: "https://github.com/tikiram/vapor-utils.git", from: "0.2.0"),
   ],
   targets: [
     .executableTarget(
@@ -23,7 +23,7 @@ let package = Package(
         .product(name: "Vapor", package: "vapor"),
         .product(name: "JWT", package: "jwt"),
         .product(name: "AWSDynamoDB", package: "aws-sdk-swift"),
-        .product(name: "SharedBackend", package: "shared-be-swift"),
+        .product(name: "SharedBackend", package: "vapor-utils"),
         "Sendgrid",
       ],
       swiftSettings: swiftSettings
