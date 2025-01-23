@@ -1,5 +1,4 @@
 import AWSDynamoDB
-import CryptoKit
 import Vapor
 
 class SessionRepo {
