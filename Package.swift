@@ -14,7 +14,7 @@ let package = Package(
     // AWS
     .package(url: "https://github.com/awslabs/aws-sdk-swift", from: "1.0.69"),
     // Shared
-    .package(url: "https://github.com/tikiram/vapor-utils.git", from: "0.2.0"),
+    .package(url: "https://github.com/tikiram/vapor-utils.git", from: "0.3.0"),
   ],
   targets: [
     .executableTarget(
