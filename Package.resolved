@@ -1,5 +1,5 @@
 {
-  "originHash" : "24346592e064e33118ed8f5f8d51f876130cabadc4407652d3ed55c75632d307",
+  "originHash" : "3c41f11cfef24404718e6c652a431cf86390a6075ecef89d4d9c0e095c4a4fdd",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -231,8 +231,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tikiram/vapor-utils.git",
       "state" : {
-        "revision" : "00543903214579ac46e3a5ad8d157a44e9ac4632",
-        "version" : "0.3.0"
+        "revision" : "8a47eb08f698a13035ad3f566c5b6af89d1138b2",
+        "version" : "0.7.0"
       }
     },
     {
