@@ -42,6 +42,7 @@ swift run App serve
 
 ## General ToDos
 
+- Check Vapor password section and see the proper way to handle encryption
 - Remove refreshToken from response for Web Apps
 
 

@@ -20,19 +20,7 @@ public func configure(_ app: Application) async throws {
 
   app.http.server.configuration.port = 3000
 
-  let corsConfiguration = CORSMiddleware.Configuration(
-    // TODO: origin should change on prod or qa
-    allowedOrigin: .any(["http://localhost:4000"]),
-    allowedMethods: [.GET, .POST, .PUT, .OPTIONS, .DELETE, .PATCH],
-    allowedHeaders: [
-      .accept, .authorization, .contentType, .origin, .xRequestedWith, .userAgent,
-      .accessControlAllowOrigin, .setCookie, .setCookie2,
-    ],
-    allowCredentials: true
-  )
-  let cors = CORSMiddleware(configuration: corsConfiguration)
-  // cors middleware should come before default error middleware using `at: .beginning`
-  app.middleware.use(cors, at: .beginning)
+  try configureCors(app)
 
   app.middleware.use(RepoErrorMiddleware())
 
@@ -49,4 +37,25 @@ public func configure(_ app: Application) async throws {
 
   // register routes
   try routes(app)
+}
+
+func configureCors(_ app: Application) throws {
+  
+  guard let corsOriginsString = Environment.get("CORS_ORIGINS") else {
+    throw RuntimeError("CORS_ORIGINS not defined")
+  }
+  let origins = corsOriginsString.split(separator: ",").map({ $0.trim() })
+  
+  let corsConfiguration = CORSMiddleware.Configuration(
+    allowedOrigin: .any(origins),
+    allowedMethods: [.GET, .POST, .PUT, .OPTIONS, .DELETE, .PATCH],
+    allowedHeaders: [
+      .accept, .authorization, .contentType, .origin, .xRequestedWith, .userAgent,
+      .accessControlAllowOrigin, .setCookie, .setCookie2,
+    ],
+    allowCredentials: true
+  )
+  let cors = CORSMiddleware(configuration: corsConfiguration)
+  // cors middleware should come before default error middleware using `at: .beginning`
+  app.middleware.use(cors, at: .beginning)
 }
