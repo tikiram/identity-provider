@@ -1,4 +1,4 @@
-// swift-tools-version:5.10
+// swift-tools-version:6.0
 import PackageDescription
 
 let package = Package(
@@ -8,11 +8,13 @@ let package = Package(
   ],
   dependencies: [
     // 💧 A server-side Swift web framework.
-    .package(url: "https://github.com/vapor/vapor.git", from: "4.105.0"),
+    .package(url: "https://github.com/vapor/vapor.git", from: "4.110.1"),
+    // 🔵 Non-blocking, event-driven networking for Swift. Used for custom executors
+    .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
     // AWS
     .package(url: "https://github.com/awslabs/aws-sdk-swift", from: "1.0.69"),
     // Shared
-    .package(url: "https://github.com/tikiram/vapor-utils.git", from: "0.7.0"),
+    .package(url: "https://github.com/tikiram/vapor-utils.git", from: "0.9.0"),
   ],
   targets: [
     .executableTarget(
@@ -22,6 +24,8 @@ let package = Package(
         .product(name: "AWSDynamoDB", package: "aws-sdk-swift"),
         .product(name: "SharedBackend", package: "vapor-utils"),
         "Sendgrid",
+        .product(name: "NIOCore", package: "swift-nio"),
+        .product(name: "NIOPosix", package: "swift-nio"),
       ],
       swiftSettings: swiftSettings
     ),
@@ -39,7 +43,8 @@ let package = Package(
         .product(name: "Vapor", package: "vapor")
       ]
     ),
-  ]
+  ],
+  swiftLanguageModes: [.v5]
 )
 
 var swiftSettings: [SwiftSetting] {

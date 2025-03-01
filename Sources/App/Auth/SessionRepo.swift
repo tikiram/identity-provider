@@ -1,5 +1,5 @@
 import AWSDynamoDB
-import Vapor
+import Foundation
 
 class SessionRepo {
 
