@@ -100,6 +100,8 @@ struct AuthControler: RouteCollection {
   private func refreshTokenGrandTypeHandler(_ req: Request) async throws -> Response {
     guard let refreshTokenCookie = req.cookies[REFRESH_TOKEN_COOKIE_NAME] else {
       throw Abort(.unauthorized, reason: "Missing refresh token")
+      // TODO: use this instead
+      // throw Abort(.badRequest, reason: "MISSING_REFRESH_TOKEN")
     }
 
     let tokens = try await Auth(req)

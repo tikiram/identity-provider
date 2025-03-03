@@ -53,3 +53,22 @@ resource "aws_dynamodb_table" "session" {
     type = "S"
   }
 }
+
+resource "aws_dynamodb_table" "recovery" {
+  name = "${var.table_name_prefix}_auth_password_reset"
+
+  billing_mode = "PAY_PER_REQUEST"
+
+  hash_key  = "email"
+  range_key = "codeHash"
+
+  attribute {
+    name = "email"
+    type = "S"
+  }
+
+  attribute {
+    name = "codeHash"
+    type = "S"
+  }
+}

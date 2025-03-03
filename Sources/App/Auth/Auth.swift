@@ -81,13 +81,13 @@ class Auth {
     // TODO: detect stolen refreshToken
 
     // https://stackoverflow.com/questions/59511628/is-it-secure-to-store-a-refresh-token-in-the-database-to-issue-new-access-toke
-    
+
     let payload = try jwt.verify(refreshToken, as: RefreshTokenPayload.self)
-    
+
     let accessToken = try createAccessToken(userId: payload.userId)
     let newRefreshToken = try createRefreshToken(
       userId: payload.userId, sessionSubId: payload.sessionSubId)
-    
+
     do {
       try await self.sessionRepo.update(
         userId: payload.userId,
@@ -96,8 +96,7 @@ class Auth {
         previousRefreshToken: refreshToken
       )
       return Tokens(accessToken: accessToken, refreshToken: newRefreshToken)
-    }
-    catch let error as ConditionalCheckFailedException {
+    } catch let error as ConditionalCheckFailedException {
       // TODO: append error information to AuthError.invalidToken
       throw AuthError.invalidToken
     }
@@ -105,11 +104,11 @@ class Auth {
 
   func logout(_ refreshToken: String) async throws {
     let payload = try jwt.verify(refreshToken, as: RefreshTokenPayload.self)
-    
+
     do {
-      try await self.sessionRepo.delete(userId: payload.userId, sessionSubId: payload.sessionSubId, refreshToken: refreshToken)
-    }
-    catch let error as ConditionalCheckFailedException {
+      try await self.sessionRepo.delete(
+        userId: payload.userId, sessionSubId: payload.sessionSubId, refreshToken: refreshToken)
+    } catch let error as ConditionalCheckFailedException {
       // TODO: append error information to AuthError.invalidToken
       throw AuthError.invalidToken
     }
@@ -136,20 +135,13 @@ class Auth {
 
   func sendResetCode(email: String) async throws {
 
-    //    let user = try await User.query(on: database)
-    //      .filter(\.$email == email.lowercased())
-    //      .first()
-    //
-    //    guard let user else {
-    //      // Visitor has no way to check the email is associated to an user
-    //      self.logger.info("Email not associated to an user")
-    //      return
-    //    }
-    //
-    //    self.logger.info("Email associated to an user")
-    //
-    //    let randomInt = Int.random(in: 0..<999999)
-    //    let code = String(format: "%06d", randomInt)
+    let userEmailMethod = try await userRepo.getEmailMethod(email)
+
+    guard let userEmailMethod else {
+      logger.info("Email not associated to an user", metadata: ["email": "\(email)"])
+      return
+    }
+    let code = getRandomIntString(digits: 6)
     //
     //    let resetAttempt = try ResetAttempt(
     //      userID: user.requireID(), email: email.lowercased(), code: code)
@@ -158,4 +150,15 @@ class Auth {
     //    try await self.emailNotifications.sendRecoveryCode(to: email, code: code)
   }
 
+}
+
+
+func getRandomInt(maxDigits: Int) -> Int {
+    let upperLimit = Int(pow(10.0, Double(maxDigits))) - 1
+    return Int.random(in: 0...upperLimit)
+}
+
+func getRandomIntString(digits: Int) -> String {
+  let randomInt = getRandomInt(maxDigits: digits)
+  return String(randomInt).padding(toLength: digits, withPad: "0", startingAt: 0)
 }
