@@ -14,6 +14,8 @@ struct TokensPayload: Content, Validatable {
 }
 
 struct PasswordGrantTypePayload: Content, Validatable {
+  let clientId: String
+  
   // TODO: some implementations send credentials on Authorization header using base64
   // TODO: username is actually `email`, check what is the standard
   let username: String
@@ -26,6 +28,7 @@ struct PasswordGrantTypePayload: Content, Validatable {
 }
 
 struct RefreshTokenGrantTypePayload: Content, Validatable {
+  let clientId: String
   let refreshToken: String
 
   static func validations(_ validations: inout Vapor.Validations) {

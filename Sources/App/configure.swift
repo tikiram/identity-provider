@@ -7,6 +7,8 @@ public func configure(_ app: Application) async throws {
   app.middleware.use(RepoErrorMiddleware())
   
   try configureEmail(app)
+  
+  app.mongoDatabases = [:]
 
   let appUtils = AppUtils(app)
 

@@ -12,7 +12,7 @@ extension Request {
 
   var userRepo: UserRepo {
     get async throws {
-      return try await UserRepo(
+      return try await DynamoDBUserRepo(
         self.dynamoDBClient, tableNamePrefix: "\(self.environmentShortName)_auth_")
     }
   }
