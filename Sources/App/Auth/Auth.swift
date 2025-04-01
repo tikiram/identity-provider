@@ -27,24 +27,28 @@ class Auth {
   private let logger: Logger
 
   private let sessionRepo: SessionRepo
+  
   private let userRepo: UserRepo
+  private let appPasswordHasher: AppPasswordHasher
 
-  init(_ req: Request) async throws {
+  init(
+    _ req: Request,
+    _ userRepo: UserRepo,
+    _ appPasswordHasher: AppPasswordHasher
+  ) async throws {
     self.jwt = req.jwt
     self.emailNotifications = try req.emailNotifications
     self.logger = req.logger
 
     self.sessionRepo = try await req.sessionRepo
-    self.userRepo = try await req.userRepo
+    
+    self.userRepo = userRepo
+    self.appPasswordHasher = appPasswordHasher
   }
 
   func register(email: String, password: String?) async throws -> Tokens {
-    do {
-      let user = try await userRepo.create(email: email, password: password!)
-      return try await createTokensForNewSession(userId: user.id)
-    } catch let error as TransactionCanceledException where hasConditionalCheckFailed(error) {
-      throw AuthError.emailAlreadyUsed
-    }
+    let user = try await userRepo.create(email: email, password: password!)
+    return try await createTokensForNewSession(userId: user.id)
   }
 
   func authenticate(email: String, password: String) async throws -> Tokens {
@@ -54,8 +58,8 @@ class Auth {
     guard let userEmailMethod else {
       throw AuthError.invalidCredentials
     }
-
-    let sameHash = try Bcrypt.verify(password, created: userEmailMethod.passwordHash)
+    
+    let sameHash = try await appPasswordHasher.verify(password, userEmailMethod.passwordHash)
 
     guard sameHash else {
       // TODO: block user for certain amount of time after 3 attempts
@@ -152,10 +156,9 @@ class Auth {
 
 }
 
-
 func getRandomInt(maxDigits: Int) -> Int {
-    let upperLimit = Int(pow(10.0, Double(maxDigits))) - 1
-    return Int.random(in: 0...upperLimit)
+  let upperLimit = Int(pow(10.0, Double(maxDigits))) - 1
+  return Int.random(in: 0...upperLimit)
 }
 
 func getRandomIntString(digits: Int) -> String {

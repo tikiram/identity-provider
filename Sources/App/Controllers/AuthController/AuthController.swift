@@ -14,26 +14,30 @@ struct AuthControler: RouteCollection {
     try SignUpPayload.validate(content: req)
     let payload = try req.content.decode(SignUpPayload.self)
 
-    let tokens = try await Auth(req)
-      .register(
-        email: payload.username,
-        password: payload.password
-      )
+    let auth = try await req.authFactory.get(clientId: payload.clientId, req: req)
+
+    let tokens = try await auth.register(
+      email: payload.username,
+      password: payload.password
+    )
 
     return try handleTokens(req, tokens)
   }
 
   func logout(_ req: Request) async throws -> Response {
 
-    // try RefreshTokenGrantTypePayload.validate(content: req)
-    // let payload = try req.content.decode(RefreshTokenGrantTypePayload.self)
+    // NOTE: refreshToken from payload or cookie should depend on the clientId
+    try RefreshTokenGrantTypePayload.validate(content: req)
+    let payload = try req.content.decode(RefreshTokenGrantTypePayload.self)
 
-    guard let refreshTokenCookie = req.cookies[REFRESH_TOKEN_COOKIE_NAME] else {
-      throw Abort(.unauthorized, reason: "Missing refresh token")
-    }
+    // TODO: re-enable cookie support
+    //guard let refreshTokenCookie = req.cookies[REFRESH_TOKEN_COOKIE_NAME] else {
+    //  throw Abort(.unauthorized, reason: "Missing refresh token")
+    //}
 
-    try await Auth(req)
-      .logout(refreshTokenCookie.string)
+    let auth = try await req.authFactory.get(clientId: payload.clientId, req: req)
+
+    try await auth.logout(payload.refreshToken)
 
     let response = Response(status: .noContent)
     AuthResponseManager(response)
@@ -46,10 +50,10 @@ struct AuthControler: RouteCollection {
     try ResetPasswordPayload.validate(content: req)
     let payload = try req.content.decode(ResetPasswordPayload.self)
 
-    // TODO: get actual payload
+    // TODO: support clientId
+    let auth = try await req.authFactory.get(clientId: "", req: req)
 
-    try await Auth(req)
-      .sendResetCode(email: payload.email)
+    try await auth.sendResetCode(email: payload.email)
 
     return .noContent
   }
@@ -75,8 +79,9 @@ struct AuthControler: RouteCollection {
       throw Abort(.badRequest, reason: "Missing password")
     }
 
-    let tokens = try await Auth(req)
-      .authenticate(email: payload.username, password: password)
+    let auth = try await req.authFactory.get(clientId: payload.clientId, req: req)
+
+    let tokens = try await auth.authenticate(email: payload.username, password: password)
 
     return try handleTokens(req, tokens)
   }
@@ -98,12 +103,18 @@ struct AuthControler: RouteCollection {
   }
 
   private func refreshTokenGrandTypeHandler(_ req: Request) async throws -> Response {
-    guard let refreshTokenCookie = req.cookies[REFRESH_TOKEN_COOKIE_NAME] else {
-      throw Abort(.badRequest, reason: "MISSING_REFRESH_TOKEN")
-    }
+    
+    // NOTE: refreshToken from payload or cookie should depend on the clientId
+    try RefreshTokenGrantTypePayload.validate(content: req)
+    let payload = try req.content.decode(RefreshTokenGrantTypePayload.self)
+    
+    //guard let refreshTokenCookie = req.cookies[REFRESH_TOKEN_COOKIE_NAME] else {
+    //  throw Abort(.badRequest, reason: "MISSING_REFRESH_TOKEN")
+    //}
 
-    let tokens = try await Auth(req)
-      .rotateTokens(refreshTokenCookie.string)
+    let auth = try await req.authFactory.get(clientId: payload.clientId, req: req)
+
+    let tokens = try await auth.rotateTokens(payload.refreshToken)
 
     return try handleTokens(req, tokens)
   }
