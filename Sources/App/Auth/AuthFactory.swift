@@ -16,6 +16,14 @@ struct ClientConfiguration {
 // NOTE: key has to be a valid env name (such as produced with md5)
 let clients: [String: ClientConfiguration] = [
   "e0ca5797b2d2b0b63fe1346c5994e7af": ClientConfiguration(
+    name: "localhost-dev",
+    userSourceType: .mongoDB
+  ),
+  "2ebe2c1b5529ac60f6ef1475669c4bdb": ClientConfiguration(
+    name: "tensai-dev",
+    userSourceType: .mongoDB
+  ),
+  "d9aef01d193453155482f274b7ce2070": ClientConfiguration(
     name: "tensai-dev",
     userSourceType: .mongoDB
   )
