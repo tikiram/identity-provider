@@ -24,7 +24,7 @@ let clients: [String: ClientConfiguration] = [
     userSourceType: .mongoDB
   ),
   "d9aef01d193453155482f274b7ce2070": ClientConfiguration(
-    name: "tensai-dev",
+    name: "tensai",
     userSourceType: .mongoDB
   )
 ]
