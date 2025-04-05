@@ -1,6 +1,7 @@
 import AWSDynamoDB
 import JWTKit
 import Vapor
+import Foundation
 
 struct Tokens {
   let accessToken: String
@@ -48,7 +49,7 @@ class Auth {
 
   func register(email: String, password: String?) async throws -> Tokens {
     let user = try await userRepo.create(email: email, password: password!)
-    return try await createTokensForNewSession(userId: user.id)
+    return try await createTokensForNewSession(user: user)
   }
 
   func authenticate(email: String, password: String) async throws -> Tokens {
@@ -65,18 +66,23 @@ class Auth {
       // TODO: block user for certain amount of time after 3 attempts
       throw AuthError.invalidCredentials
     }
+    
+    let user = try await userRepo.getUser(userId: userEmailMethod.userId)
 
-    return try await createTokensForNewSession(userId: userEmailMethod.userId)
+    return try await createTokensForNewSession(user: user)
   }
 
-  private func createTokensForNewSession(userId: String) async throws -> Tokens {
-    let accessToken = try createAccessToken(userId: userId)
+  private func createTokensForNewSession(user: User) async throws -> Tokens {
+    let accessToken = try await createAccessToken(userId: user.id, roles: user.roles)
 
     let sessionSubId = UUID().uuidString
-    let refreshToken = try createRefreshToken(userId: userId, sessionSubId: sessionSubId)
+    let refreshToken = try await createRefreshToken(
+      userId: user.id,
+      roles: user.roles,
+      sessionSubId: sessionSubId)
 
     try await self.sessionRepo.save(
-      userId: userId, sessionSubId: sessionSubId, refreshToken: refreshToken)
+      userId: user.id, sessionSubId: sessionSubId, refreshToken: refreshToken)
 
     return Tokens(accessToken: accessToken, refreshToken: refreshToken)
   }
@@ -86,11 +92,13 @@ class Auth {
 
     // https://stackoverflow.com/questions/59511628/is-it-secure-to-store-a-refresh-token-in-the-database-to-issue-new-access-toke
 
-    let payload = try jwt.verify(refreshToken, as: RefreshTokenPayload.self)
+    let payload = try await jwt.verify(refreshToken, as: RefreshTokenPayload.self)
 
-    let accessToken = try createAccessToken(userId: payload.userId)
-    let newRefreshToken = try createRefreshToken(
-      userId: payload.userId, sessionSubId: payload.sessionSubId)
+    let accessToken = try await createAccessToken(userId: payload.userId, roles: payload.roles)
+    let newRefreshToken = try await createRefreshToken(
+      userId: payload.userId,
+      roles: payload.roles,
+      sessionSubId: payload.sessionSubId)
 
     do {
       try await self.sessionRepo.update(
@@ -107,7 +115,7 @@ class Auth {
   }
 
   func logout(_ refreshToken: String) async throws {
-    let payload = try jwt.verify(refreshToken, as: RefreshTokenPayload.self)
+    let payload = try await jwt.verify(refreshToken, as: RefreshTokenPayload.self)
 
     do {
       try await self.sessionRepo.delete(
@@ -118,22 +126,24 @@ class Auth {
     }
   }
 
-  private func createAccessToken(userId: String) throws -> String {
+  private func createAccessToken(userId: String, roles: [String]) async throws -> String {
     let payload = TokenPayload(
       userId: userId,
+      roles: roles,
       duration: Self.accessTokenExpirationTime
     )
-    let token = try jwt.sign(payload, kid: "private")
+    let token = try await jwt.sign(payload, kid: "private")
     return token
   }
 
-  private func createRefreshToken(userId: String, sessionSubId: String) throws -> String {
+  private func createRefreshToken(userId: String, roles: [String], sessionSubId: String) async throws -> String {
     let refreshPayload = RefreshTokenPayload(
       userId: userId,
+      roles: roles,
       duration: Self.refreshTokenExpirationTime,
       sessionSubId: sessionSubId
     )
-    let refreshToken = try jwt.sign(refreshPayload, kid: "private")
+    let refreshToken = try await jwt.sign(refreshPayload, kid: "private")
     return refreshToken
   }
 

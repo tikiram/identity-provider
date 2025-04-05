@@ -12,13 +12,13 @@ let package = Package(
     // 🔵 Non-blocking, event-driven networking for Swift. Used for custom executors
     .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
     // JWT
-    .package(url: "https://github.com/vapor/jwt.git", from: "4.2.1"),
+    .package(url: "https://github.com/vapor/jwt.git", from: "5.1.2"),
     // AWS
     .package(url: "https://github.com/awslabs/aws-sdk-swift", from: "1.2.49"),
     // MongoDB
     .package(url: "https://github.com/orlandos-nl/MongoKitten.git", from: "7.9.9"),
     // Shared
-    .package(url: "https://github.com/tikiram/vapor-utils.git", from: "0.9.0"),
+    .package(url: "https://github.com/tikiram/vapor-utils.git", from: "0.10.0"),
   ],
   targets: [
     .executableTarget(

@@ -30,6 +30,7 @@ final class MongoDBUserRepo: UserRepo {
     let user = MongoDBUser(
       _id: uniqueId,
       createdAt: Date(),
+      roles: [],
       email: serializedEmail,
       passwordHash: passwordHash
     )
@@ -45,6 +46,21 @@ final class MongoDBUserRepo: UserRepo {
       throw AuthError.emailAlreadyUsed
     }
 
+    return user
+  }
+  
+  func getUser(userId: String) async throws -> User {
+    let meow = MeowDatabase(mongoDatabase)
+    let users = meow[MongoDBUser.self]
+    
+    let user = try await users.findOne {
+      $0.$_id == userId
+    }
+    
+    guard let user else {
+      throw UserRepoError.userNotFound
+    }
+    
     return user
   }
 

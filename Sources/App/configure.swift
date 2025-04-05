@@ -14,7 +14,7 @@ public func configure(_ app: Application) async throws {
 
   try appUtils.configureCors()
   appUtils.setCompanyStandardJSONEncoderDecoder()
-  try appUtils.configurePrivateKey()
+  try await appUtils.configurePrivateKey()
 
   // register routes
   try routes(app)

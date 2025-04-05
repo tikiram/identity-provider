@@ -23,12 +23,13 @@ final class DynamoDBUserRepo: UserRepo {
       throw AuthError.emailAlreadyUsed
     }
   }
-  
+
   private func createOnDynamo(email: String, password: String) async throws -> User {
     let uniqueID = UUID().uuidString
     let serializedEmail = email.trim().lowercased()
     let passwordHash = try Bcrypt.hash(password)
 
+    // TODO: Use models instead of manually creating the item value
     let put1 = DynamoDBClientTypes.Put(
       conditionExpression: "attribute_not_exists(id)",
       item: [
@@ -54,8 +55,28 @@ final class DynamoDBUserRepo: UserRepo {
     let input = TransactWriteItemsInput(transactItems: [item2, item1])
     let _ = try await client.transactWriteItems(input: input)
 
-    let user = DynamoDBUser(id: uniqueID)
+    let user = DynamoDBUser(id: uniqueID, roles: [])
     return user
+  }
+
+  func getUser(userId: String) async throws -> any User {
+
+    //    let input = GetItemInput(
+    //      consistentRead: false,
+    //      key: [
+    //        "id": .s(userId)
+    //      ],
+    //      tableName: self.userTableName
+    //    )
+    //
+    //    let output = try await client.getItem(input: input)
+    //
+    //    guard let item = output.item else {
+    //      throw UserRepoError.userNotFound
+    //    }
+    
+    // TODO: provisional implementation
+    return DynamoDBUser(id: userId, roles: [])
   }
 
   func getEmailMethod(_ email: String) async throws -> UserEmailMethod? {

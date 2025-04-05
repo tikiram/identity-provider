@@ -13,6 +13,8 @@ struct MongoDBUser: Model, User {
   @Field var _id: String
   @Field var createdAt: Date
   
+  @Field var roles: [String]
+  
   @Field var email: String
   @Field var passwordHash: String
 }
