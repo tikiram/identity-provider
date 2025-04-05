@@ -91,7 +91,11 @@ struct AuthControler: RouteCollection {
 
     // TODO: this cookie should only be created with web apps
 
-    let tokensResponse = TokensResponse(tokens: tokens, expiresIn: Auth.accessTokenExpirationTime)
+    let tokensResponse = TokensResponse(
+      tokens: tokens,
+      expiresIn: Auth.accessTokenExpirationTime,
+      refreshTokenExpiresIn: Auth.refreshTokenExpirationTime
+    )
 
     let response = Response()
     try response.content.encode(tokensResponse, as: .json)

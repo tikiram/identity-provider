@@ -100,7 +100,7 @@ class Auth {
         previousRefreshToken: refreshToken
       )
       return Tokens(accessToken: accessToken, refreshToken: newRefreshToken)
-    } catch let error as ConditionalCheckFailedException {
+    } catch _ as ConditionalCheckFailedException {
       // TODO: append error information to AuthError.invalidToken
       throw AuthError.invalidToken
     }
@@ -112,7 +112,7 @@ class Auth {
     do {
       try await self.sessionRepo.delete(
         userId: payload.userId, sessionSubId: payload.sessionSubId, refreshToken: refreshToken)
-    } catch let error as ConditionalCheckFailedException {
+    } catch _ as ConditionalCheckFailedException {
       // TODO: append error information to AuthError.invalidToken
       throw AuthError.invalidToken
     }
