@@ -44,16 +44,10 @@ swift run App serve
 
 ## General ToDos
 
-- Check Vapor password section and see the proper way to handle encryption
-- Remove refreshToken from response for Web Apps
-
-
 - Check Vapor docs and add tests
-- Check Oauth 2 protocol standars
 - Add password reset flow
   - code generation
   - email notification
-- Support passwordless email
 
 
 ## Public dev key
