@@ -1,5 +1,7 @@
 
-# identity-provider
+# jwt-auth-service
+
+Token-based authentication (JWT) service done with Vapor (https://vapor.codes).
 
 ## Project setup
 
