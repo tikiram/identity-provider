@@ -8,7 +8,7 @@ Content-Type: application/json
 
 {
   "client_id": "e0ca5797b2d2b0b63fe1346c5994e7af",
-  "username": "test1@test.com",
+  "username": "test2@test.com",
   "password": "test"
 }
 

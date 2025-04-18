@@ -1,7 +1,6 @@
-import AWSDynamoDB
+import Foundation
 import JWTKit
 import Vapor
-import Foundation
 
 struct Tokens {
   let accessToken: String
@@ -11,8 +10,6 @@ struct Tokens {
 enum AuthError: Error {
   case jwtError(JWTError)
   case tokenNotFound
-  case notValidToken  // TODO: remove this
-  case invalidToken
   case emailAlreadyUsed
   case userHasNoPassword
   case invalidCredentials
@@ -28,7 +25,7 @@ class Auth {
   private let logger: Logger
 
   private let sessionRepo: SessionRepo
-  
+
   private let userRepo: UserRepo
   private let appPasswordHasher: AppPasswordHasher
 
@@ -42,7 +39,7 @@ class Auth {
     self.logger = req.logger
 
     self.sessionRepo = try await req.sessionRepo
-    
+
     self.userRepo = userRepo
     self.appPasswordHasher = appPasswordHasher
   }
@@ -59,14 +56,14 @@ class Auth {
     guard let userEmailMethod else {
       throw AuthError.invalidCredentials
     }
-    
+
     let sameHash = try await appPasswordHasher.verify(password, userEmailMethod.passwordHash)
 
     guard sameHash else {
       // TODO: block user for certain amount of time after 3 attempts
       throw AuthError.invalidCredentials
     }
-    
+
     let user = try await userRepo.getUser(userId: userEmailMethod.userId)
 
     return try await createTokensForNewSession(user: user)
@@ -79,10 +76,14 @@ class Auth {
     let refreshToken = try await createRefreshToken(
       userId: user.id,
       roles: user.roles,
-      sessionSubId: sessionSubId)
+      sessionSubId: sessionSubId
+    )
 
     try await self.sessionRepo.save(
-      userId: user.id, sessionSubId: sessionSubId, refreshToken: refreshToken)
+      userId: user.id,
+      sessionSubId: sessionSubId,
+      refreshToken: refreshToken
+    )
 
     return Tokens(accessToken: accessToken, refreshToken: refreshToken)
   }
@@ -98,32 +99,25 @@ class Auth {
     let newRefreshToken = try await createRefreshToken(
       userId: payload.userId,
       roles: payload.roles,
-      sessionSubId: payload.sessionSubId)
+      sessionSubId: payload.sessionSubId
+    )
 
-    do {
-      try await self.sessionRepo.update(
-        userId: payload.userId,
-        sessionSubId: payload.sessionSubId,
-        newRefreshToken: newRefreshToken,
-        previousRefreshToken: refreshToken
-      )
-      return Tokens(accessToken: accessToken, refreshToken: newRefreshToken)
-    } catch _ as ConditionalCheckFailedException {
-      // TODO: append error information to AuthError.invalidToken
-      throw AuthError.invalidToken
-    }
+    try await self.sessionRepo.update(
+      userId: payload.userId,
+      sessionSubId: payload.sessionSubId,
+      newRefreshToken: newRefreshToken,
+      previousRefreshToken: refreshToken
+    )
+    return Tokens(accessToken: accessToken, refreshToken: newRefreshToken)
   }
 
   func logout(_ refreshToken: String) async throws {
     let payload = try await jwt.verify(refreshToken, as: RefreshTokenPayload.self)
-
-    do {
-      try await self.sessionRepo.delete(
-        userId: payload.userId, sessionSubId: payload.sessionSubId, refreshToken: refreshToken)
-    } catch _ as ConditionalCheckFailedException {
-      // TODO: append error information to AuthError.invalidToken
-      throw AuthError.invalidToken
-    }
+    try await self.sessionRepo.delete(
+      userId: payload.userId,
+      sessionSubId: payload.sessionSubId,
+      refreshToken: refreshToken
+    )
   }
 
   private func createAccessToken(userId: String, roles: [String]) async throws -> String {
@@ -136,7 +130,9 @@ class Auth {
     return token
   }
 
-  private func createRefreshToken(userId: String, roles: [String], sessionSubId: String) async throws -> String {
+  private func createRefreshToken(userId: String, roles: [String], sessionSubId: String)
+    async throws -> String
+  {
     let refreshPayload = RefreshTokenPayload(
       userId: userId,
       roles: roles,
@@ -149,13 +145,13 @@ class Auth {
 
   func sendResetCode(email: String) async throws {
 
-    let userEmailMethod = try await userRepo.getEmailMethod(email)
-
-    guard let userEmailMethod else {
-      logger.info("Email not associated to an user", metadata: ["email": "\(email)"])
-      return
-    }
-    let code = getRandomIntString(digits: 6)
+    //    let userEmailMethod = try await userRepo.getEmailMethod(email)
+    //
+    //    guard let userEmailMethod else {
+    //      logger.info("Email not associated to an user", metadata: ["email": "\(email)"])
+    //      return
+    //    }
+    //    let code = getRandomIntString(digits: 6)
     //
     //    let resetAttempt = try ResetAttempt(
     //      userID: user.requireID(), email: email.lowercased(), code: code)

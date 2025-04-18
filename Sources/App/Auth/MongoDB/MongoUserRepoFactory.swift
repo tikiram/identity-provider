@@ -32,18 +32,13 @@ class MongoUserRepoFactory: UserRepoFactory {
         named: "unique-email",
         field: "email"
       )
-      
-      // Index to get only users with certain role
-      
-      // TODO: text indexes not working ?
 
-      
-      //TextScoreIndex(named: "search-email", field: "passwordHash")
+      // Note: TextScoreIndex seems not working
+      // TextScoreIndex(named: "email-search", field: "email")
+      // Use this instead
+      // SortedIndex(named: "email-search", field: "email", order: .custom("text"))
 
-//      TextScoreIndex(
-//        named: "search-email",
-//        field: "email"
-//      )
+      SortedIndex(named: "role-search", field: "roles")
     }
 
     // Setup Indexes here
