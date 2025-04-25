@@ -44,6 +44,9 @@ swift run App serve
 
 ## General ToDos
 
+- Load MongoDatabase from the start
+- Refactor Services
+- ***Improve decoupling***
 - Check Vapor docs and add tests
 - Add password reset flow
   - code generation

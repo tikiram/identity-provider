@@ -11,6 +11,8 @@ public func configure(_ app: Application) async throws {
   app.mongoDatabases = [:]
 
   let appUtils = AppUtils(app)
+  
+  
 
   try appUtils.configureCors()
   appUtils.setCompanyStandardJSONEncoderDecoder()

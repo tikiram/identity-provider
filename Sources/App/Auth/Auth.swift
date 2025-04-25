@@ -32,13 +32,14 @@ class Auth {
   init(
     _ req: Request,
     _ userRepo: UserRepo,
+    _ sessionRepo: SessionRepo,
     _ appPasswordHasher: AppPasswordHasher
   ) async throws {
     self.jwt = req.jwt
     self.emailNotifications = try req.emailNotifications
     self.logger = req.logger
 
-    self.sessionRepo = try await req.sessionRepo
+    self.sessionRepo = sessionRepo
 
     self.userRepo = userRepo
     self.appPasswordHasher = appPasswordHasher
@@ -113,7 +114,7 @@ class Auth {
 
   func logout(_ refreshToken: String) async throws {
     let payload = try await jwt.verify(refreshToken, as: RefreshTokenPayload.self)
-    try await self.sessionRepo.delete(
+    try await self.sessionRepo.invalidate(
       userId: payload.userId,
       sessionSubId: payload.sessionSubId,
       refreshToken: refreshToken

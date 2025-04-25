@@ -26,7 +26,7 @@ let clients: [String: ClientConfiguration] = [
   "d9aef01d193453155482f274b7ce2070": ClientConfiguration(
     name: "tensai",
     userSourceType: .mongoDB
-  )
+  ),
 ]
 
 enum AuthFactoryError: Error {
@@ -37,19 +37,23 @@ enum AuthFactoryError: Error {
 protocol UserRepoFactory {
   func get(clientId: String) async throws -> UserRepo
 }
+protocol SessionRepoFactory {
+  func get(clientId: String) async throws -> SessionRepo
+}
 
 class AuthFactory {
 
   private let mongoUserRepoFactory: MongoUserRepoFactory
-  // private let appMongoDatabaseRepo: AppMongoDatabaseRepo
+  private let mongoSessionRepoFactory: MongoSessionRepoFactory
   private let appPasswordHasher: AppPasswordHasher
 
   init(
     _ mongoUserRepoFactory: MongoUserRepoFactory,
-    // appMongoDatabaseRepo: AppMongoDatabaseRepo,
+    _ mongoSessionRepoFactory: MongoSessionRepoFactory,
     _ appPasswordHasher: AppPasswordHasher
   ) {
     self.mongoUserRepoFactory = mongoUserRepoFactory
+    self.mongoSessionRepoFactory = mongoSessionRepoFactory
     // self.appMongoDatabaseRepo = appMongoDatabaseRepo
     self.appPasswordHasher = appPasswordHasher
   }
@@ -59,8 +63,9 @@ class AuthFactory {
     let config = try getClientConfiguration(clientId)
 
     let userRepo = try await getUserRepo(clientId, config)
+    let sessionRepo = try await getSessionRepo(clientId, config)
 
-    return try await Auth(req, userRepo, appPasswordHasher)
+    return try await Auth(req, userRepo, sessionRepo, appPasswordHasher)
   }
 
   private func getUserRepo(
@@ -74,6 +79,20 @@ class AuthFactory {
       throw AuthFactoryError.notImplemented
     case .mongoDB:
       return try await self.mongoUserRepoFactory.get(clientId: clientId)
+    }
+  }
+
+  private func getSessionRepo(
+    _ clientId: String,
+    _ config: ClientConfiguration
+  )
+    async throws -> SessionRepo
+  {
+    switch config.userSourceType {
+    case .dynamoDB:
+      throw AuthFactoryError.notImplemented
+    case .mongoDB:
+      return try await self.mongoSessionRepoFactory.get(clientId: clientId)
     }
   }
 

@@ -11,6 +11,9 @@ struct RepoErrorMiddleware: AsyncMiddleware {
       switch error {
       case .tokenOutOfSync:
         throw Abort(.unauthorized, reason: "TOKEN_OUT_OF_SYNC")
+      case .unexpectedError(let description):
+        throw Abort(.internalServerError, reason: description)
+
       }
     }
     catch let error as AuthError {

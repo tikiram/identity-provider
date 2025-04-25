@@ -14,7 +14,7 @@ let package = Package(
     // JWT
     .package(url: "https://github.com/vapor/jwt.git", from: "5.1.2"),
     // AWS
-    .package(url: "https://github.com/awslabs/aws-sdk-swift", from: "1.2.49"),
+    .package(url: "https://github.com/awslabs/aws-sdk-swift", from: "1.2.62"),
     // MongoDB
     .package(url: "https://github.com/orlandos-nl/MongoKitten.git", from: "7.9.9"),
     // Shared
