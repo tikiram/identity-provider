@@ -2,7 +2,7 @@ import Foundation
 import Meow
 
 struct MongoSession: Model {
-  public static let collectionName: String = "session"
+  public static let collectionName: String = "sessions"
 
   var id: String {
     return self._id.description

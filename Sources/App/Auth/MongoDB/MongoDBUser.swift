@@ -4,7 +4,7 @@ import Meow
 
 
 struct MongoDBUser: Model, User {
-  public static let collectionName: String = "user"
+  public static let collectionName: String = "users"
   
   var id: String {
     return self._id
