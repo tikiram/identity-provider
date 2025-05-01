@@ -1,0 +1,18 @@
+GET {{host}}
+Accept: application/json
+
+### Register
+
+POST {{host}}/b/v1/auth/register
+Content-Type: application/json
+x-client-type: service
+
+{
+  "email": "test11@test.com",
+  "password": "test"
+}
+
+> {%
+    client.global.set("access_token", response.body.access_token);
+    client.global.set("refresh_token", response.body.refresh_token);
+%}

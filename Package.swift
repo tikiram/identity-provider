@@ -1,4 +1,4 @@
-// swift-tools-version:6.0
+// swift-tools-version:6.1
 import PackageDescription
 
 let package = Package(
@@ -8,9 +8,9 @@ let package = Package(
   ],
   dependencies: [
     // 💧 A server-side Swift web framework.
-    .package(url: "https://github.com/vapor/vapor.git", from: "4.110.1"),
+    .package(url: "https://github.com/vapor/vapor.git", from: "4.114.1"),
     // 🔵 Non-blocking, event-driven networking for Swift. Used for custom executors
-    .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
+    .package(url: "https://github.com/apple/swift-nio.git", from: "2.82.1"),
     // JWT
     .package(url: "https://github.com/vapor/jwt.git", from: "5.1.2"),
     // AWS
@@ -33,6 +33,8 @@ let package = Package(
         "Sendgrid",
         .product(name: "NIOCore", package: "swift-nio"),
         .product(name: "NIOPosix", package: "swift-nio"),
+        "AuthCore",
+        "MongoAuth",
       ],
       swiftSettings: swiftSettings
     ),
@@ -43,6 +45,17 @@ let package = Package(
         .product(name: "XCTVapor", package: "vapor"),
       ],
       swiftSettings: swiftSettings
+    ),
+    .target(
+      name: "MongoAuth",
+      dependencies: [
+        "AuthCore",
+        .product(name: "Meow", package: "MongoKitten"),
+      ]
+    ),
+    .target(
+      name: "AuthCore",
+      dependencies: []
     ),
     .target(
       name: "Sendgrid",

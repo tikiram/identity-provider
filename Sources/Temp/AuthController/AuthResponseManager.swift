@@ -1,7 +1,7 @@
 import Vapor
 
 
-let REFRESH_TOKEN_COOKIE_NAME = "x_rtkn"
+private let REFRESH_TOKEN_COOKIE_NAME = "x_rtkn"
 
 class AuthResponseManager {
 
