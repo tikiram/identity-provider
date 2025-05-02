@@ -60,4 +60,27 @@ public class MongoAuthManager {
     }
   }
 
+  public func configureUserPool(
+    _ poolTableName: String,
+    _ userPoolTableName: String
+  ) async throws {
+
+    // Note: no configuration required for pool table
+
+    let meowDatabase = MeowDatabase(mongoDatabase)
+    let userPool = MeowCollection<MongoUserPool>(database: meowDatabase, named: userPoolTableName)
+
+    try await userPool.buildIndexes {
+      SortedIndex(
+        by: [
+          $0.$userId.path.string: .ascending,
+          $0.$poolId.path.string: .ascending,
+        ],
+        named: "unique-user-pool"
+      )
+      .unique()
+    }
+
+  }
+
 }

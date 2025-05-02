@@ -1,9 +1,17 @@
-import Vapor
 import SharedBackend
+import Vapor
+
+private let masterPoolName = "master"
 
 extension Request {
   var poolId: String {
-    return self.headers.first(name: "x-pool-id") ?? ""
+    let value = self.headers.first(name: "x-pool-id") ?? ""
+
+    guard !value.isEmpty else {
+      return masterPoolName
+    }
+
+    return value
   }
 }
 
@@ -23,4 +31,3 @@ extension Request {
     }
   }
 }
-

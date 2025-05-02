@@ -3,11 +3,9 @@ import Vapor
 struct PoolsControler: RouteCollection {
 
   func boot(routes: RoutesBuilder) throws {
-
-    let todos = routes.grouped("pools")
-    //todos.get(use: index)
-    todos.post(use: create)
-
+    let pools = routes.grouped("pools")
+    pools.post(use: create)
+    pools.get(use: index)
   }
 
   private struct CreatePayload: Content, Validatable {
@@ -22,17 +20,24 @@ struct PoolsControler: RouteCollection {
     }
   }
   @Sendable
-  func create(req: Request) async throws -> Response {
+  func create(req: Request) async throws -> String {
     try CreatePayload.validate(content: req)
     let payload = try req.content.decode(CreatePayload.self)
 
-    //    let auth = try req.bAuth()
+    let userPoolService = try req.getUserPoolService()
 
-    //let tokens = try await auth.register(payload.email, payload.password)
+    try await userPoolService.create(payload.kid, payload.privateKey, payload.publicKey)
 
-    let response = Response()
+    return "prro"
+  }
 
-    return response
+  @Sendable
+  func index(req: Request) throws -> String {
+
+    let payload = try req.auth.require(AppTokenPayload.self)
+    print(payload)
+
+    return "hola prro"
   }
 }
 

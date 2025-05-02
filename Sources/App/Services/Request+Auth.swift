@@ -15,11 +15,13 @@ extension Request {
     _ poolId: String,
     _ accessTokenExpirationTime: TimeInterval,
     _ refreshTokenExpirationTime: TimeInterval
-  ) -> Auth {
-    let userRepo = MongoUserRepo(self.mongo, "b_users", poolId)
+  ) throws -> Auth {
+    let mongoNames = try self.getMongoNames()
+
+    let userRepo = MongoUserRepo(self.mongo, mongoNames.users, poolId)
     let userService = UserService(userRepo, self.password.async)
 
-    let sessionRepo = MongoSessionRepo(self.mongo, "b_sessions", self.simpleHasher)
+    let sessionRepo = MongoSessionRepo(self.mongo, mongoNames.sessions, self.simpleHasher)
 
     let tokenManager = AppTokenManager(
       self.jwt,
@@ -34,12 +36,12 @@ extension Request {
 
   func bAuth() throws -> Auth {
 
-    if self.poolId.isEmpty {
+    if self.poolId == "master" {
       guard let config = self.application.masterPoolConfig else {
         throw RuntimeError("Missing master pool configuration")
       }
 
-      return self.bAuth(
+      return try self.bAuth(
         "master",
         config.accessTokenExpirationTime,
         config.refreshTokenExpirationTime

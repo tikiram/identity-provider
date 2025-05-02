@@ -3,6 +3,8 @@ import Vapor
 struct MongoNames {
   let users: String
   let sessions: String
+  let pools: String
+  let userPools: String 
 }
 
 private struct MongoNamesKey: StorageKey {

@@ -14,7 +14,12 @@ public func configure(_ app: Application) async throws {
     refreshTokenExpirationTime: 60 * 15
   )
 
-  app.mongoNames = MongoNames(users: "b_users", sessions: "b_sessions")
+  app.mongoNames = MongoNames(
+    users: "b_users",
+    sessions: "b_sessions",
+    pools: "b_pools",
+    userPools: "b_user_pools",
+  )
 
   let appUtils = AppUtils(app)
   try appUtils.configureCors()
@@ -58,5 +63,6 @@ extension Application {
     let manager = MongoAuthManager(self.mongo)
     try await manager.configureUsers(mongoNames.users)
     try await manager.configureSession(mongoNames.sessions)
+    try await manager.configureUserPool(mongoNames.pools, mongoNames.userPools)
   }
 }
