@@ -5,7 +5,6 @@ struct PoolsControler: RouteCollection {
   func boot(routes: RoutesBuilder) throws {
     let pools = routes.grouped("pools")
     pools.post(use: create)
-    pools.get(use: index)
   }
 
   private struct CreatePayload: Content, Validatable {
@@ -20,7 +19,7 @@ struct PoolsControler: RouteCollection {
     }
   }
   @Sendable
-  func create(req: Request) async throws -> String {
+  func create(req: Request) async throws -> HTTPStatus {
     try CreatePayload.validate(content: req)
     let payload = try req.content.decode(CreatePayload.self)
 
@@ -28,26 +27,6 @@ struct PoolsControler: RouteCollection {
 
     try await userPoolService.create(payload.kid, payload.privateKey, payload.publicKey)
 
-    return "prro"
+    return .noContent
   }
-
-  @Sendable
-  func index(req: Request) throws -> String {
-
-    let payload = try req.auth.require(AppTokenPayload.self)
-    print(payload)
-
-    return "hola prro"
-  }
-}
-
-private struct LiteTokensResponse: Content {
-  let accessToken: String
-  let expiresIn: Double
-}
-private struct TokensResponse: Content {
-  let accessToken: String
-  let expiresIn: Double
-  let refreshToken: String
-  let refreshTokenExpiresIn: Double
 }

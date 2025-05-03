@@ -42,30 +42,34 @@ public class MongoUserPoolRepo: UserPoolRepo {
       poolId: serializedKid
     )
 
-    let meowDatabase = MeowDatabase(mongoDatabase)
+    // Note: transaction not available in local env
+    // TODO: check how transactions are handled on mongoDB
+    // https://stackoverflow.com/questions/51461952/mongodb-v4-0-transaction-mongoerror-transaction-numbers-are-only-allowed-on-a
 
-    try await meowDatabase.withTransaction { db in
-      let pools = getPoolCollection(db)
-      let userPools = getUserPoolCollection(db)
-      let poolReply = try await pools.insert(pool)
+    //try await meowDatabase.withTransaction { db in
 
-      if poolReply.insertCount == 0 {
-        throw UserPoolRepoError.unexpectedError(poolReply.debugDescription)
-      }
-      let userPoolReply = try await userPools.insert(userPool)
-      if userPoolReply.insertCount == 0 {
-        throw UserPoolRepoError.unexpectedError(userPoolReply.debugDescription)
-      }
+    let pools = getPoolCollection()
+    let userPools = getUserPoolCollection()
+    let poolReply = try await pools.insert(pool)
+
+    // TODO: it can exists orphan pools because this is outside of a transaction
+    if poolReply.insertCount == 0 {
+      throw UserPoolRepoError.unexpectedError(poolReply.debugDescription)
+    }
+
+    let userPoolReply = try await userPools.insert(userPool)
+    if userPoolReply.insertCount == 0 {
+      throw UserPoolRepoError.unexpectedError(userPoolReply.debugDescription)
     }
 
   }
 
-  private func getPoolCollection(_ db: MeowDatabase?) -> MeowCollection<MongoPool> {
+  private func getPoolCollection(_ db: MeowDatabase? = nil) -> MeowCollection<MongoPool> {
     let meowDatabase = db ?? MeowDatabase(mongoDatabase)
     return MeowCollection<MongoPool>(database: meowDatabase, named: self.poolTableName)
   }
 
-  private func getUserPoolCollection(_ db: MeowDatabase?) -> MeowCollection<MongoUserPool> {
+  private func getUserPoolCollection(_ db: MeowDatabase? = nil) -> MeowCollection<MongoUserPool> {
     let meowDatabase = db ?? MeowDatabase(mongoDatabase)
     return MeowCollection<MongoUserPool>(database: meowDatabase, named: self.userPoolTableName)
   }

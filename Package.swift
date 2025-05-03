@@ -30,7 +30,6 @@ let package = Package(
         .product(name: "MongoKitten", package: "MongoKitten"),
         .product(name: "Meow", package: "MongoKitten"),
         .product(name: "SharedBackend", package: "vapor-utils"),
-        "Sendgrid",
         .product(name: "NIOCore", package: "swift-nio"),
         .product(name: "NIOPosix", package: "swift-nio"),
         "AuthCore",
@@ -56,12 +55,6 @@ let package = Package(
     .target(
       name: "AuthCore",
       dependencies: []
-    ),
-    .target(
-      name: "Sendgrid",
-      dependencies: [
-        .product(name: "Vapor", package: "vapor")
-      ]
     ),
   ],
   swiftLanguageModes: [.v5]

@@ -5,6 +5,10 @@ private let REFRESH_TOKEN_COOKIE_NAME = "x_rtkn"
 
 extension Response {
 
+  func removeRefreshTokenCookie() {
+    setRefreshTokenCookie(TokenInfo(value: "", expiresIn: 0))
+  }
+
   func setRefreshTokenCookie(_ tokenInfo: TokenInfo) {
 
     let cookie = createRefreshTokenCookie(
@@ -38,4 +42,40 @@ extension Response {
     return cookie
   }
 
+}
+
+extension Response {
+
+  func handleTokens(_ clientType: ClientType, _ tokens: Tokens) throws {
+    switch clientType {
+    case .web:
+      let responseContent = LiteTokensResponse(
+        accessToken: tokens.accessTokenInfo.value,
+        expiresIn: tokens.refreshTokenInfo.expiresIn,
+      )
+      try self.content.encode(responseContent, as: .json)
+
+    case .mobile, .service:
+      let responseContent = TokensResponse(
+        accessToken: tokens.accessTokenInfo.value,
+        expiresIn: tokens.refreshTokenInfo.expiresIn,
+        refreshToken: tokens.refreshTokenInfo.value,
+        refreshTokenExpiresIn: tokens.refreshTokenInfo.expiresIn
+      )
+      try self.content.encode(responseContent, as: .json)
+      self.setRefreshTokenCookie(tokens.refreshTokenInfo)
+    }
+  }
+
+}
+
+private struct LiteTokensResponse: Content {
+  let accessToken: String
+  let expiresIn: Double
+}
+private struct TokensResponse: Content {
+  let accessToken: String
+  let expiresIn: Double
+  let refreshToken: String
+  let refreshTokenExpiresIn: Double
 }
