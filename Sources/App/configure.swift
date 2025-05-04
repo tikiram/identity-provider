@@ -8,7 +8,7 @@ private let DAY = 24 * HOUR
 public func configure(_ app: Application) async throws {
 
   app.http.server.configuration.port = 3000
-  //  app.middleware.use(RepoErrorMiddleware())
+  app.middleware.use(RepoErrorMiddleware())
 
   app.poolsConfig = PoolsConfig(
     accessTokenExpirationTime: 15 * MINUTE,

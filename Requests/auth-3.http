@@ -8,7 +8,7 @@ Content-Type: application/json
 x-client-type: service
 
 {
-  "email": "test3@test.com",
+  "email": "test5@test.com",
   "password": "test"
 }
 
@@ -25,7 +25,7 @@ x-client-type: service
 
 {
   "email": "test3@test.com",
-  "password": "test"
+  "password": "test2"
 }
 
 > {%
@@ -47,6 +47,16 @@ x-client-type: service
     client.global.set("access_token", response.body.access_token);
     client.global.set("refresh_token", response.body.refresh_token);
 %}
+
+### logout
+
+POST {{host}}/b/v1/auth/logout
+Content-Type: application/json
+x-client-type: service
+
+{
+  "refresh_token": "{{refresh_token}}"
+}
 
 
 ### pools

@@ -1,4 +1,4 @@
-enum UserServiceError: Error {
+public enum UserServiceError: Error {
   case invalidCredentials
 }
 
