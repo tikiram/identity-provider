@@ -7,12 +7,17 @@ import Vapor
 extension Request {
 
   var simpleHasher: SimpleHasher {
-    return AppSimpleHasher()
+    switch self.application.environment {
+    case .development:
+      return DevSimpleHasher()
+    default:
+      return AppSimpleHasher()
+    }
   }
 
   // JWT key has to be already defined before calling this method
   func bAuth(
-    _ poolId: String,
+    _ poolId: String?,
     _ accessTokenExpirationTime: TimeInterval,
     _ refreshTokenExpirationTime: TimeInterval
   ) throws -> Auth {
@@ -23,9 +28,11 @@ extension Request {
 
     let sessionRepo = MongoSessionRepo(self.mongo, mongoNames.sessions, self.simpleHasher)
 
+    let config = try self.application.getPoolConfig()
+
     let tokenManager = AppTokenManager(
-      self.jwt,
-      poolId,
+      jwt: self.jwt,
+      kid: poolId ?? config.rootPoolKid,
       accessTokenExpirationTime,
       refreshTokenExpirationTime
     )
@@ -35,21 +42,15 @@ extension Request {
   }
 
   func bAuth() throws -> Auth {
+    let config = try self.application.getPoolConfig()
 
-    if self.poolId == "master" {
-      guard let config = self.application.masterPoolConfig else {
-        throw RuntimeError("Missing master pool configuration")
-      }
-
-      return try self.bAuth(
-        "master",
-        config.accessTokenExpirationTime,
-        config.refreshTokenExpirationTime
-      )
-    }
-
-    // TODO: get values from loaded pools
-    throw RuntimeError("Pools not loaded")
+    return try self.bAuth(
+      self.poolId,
+      self.poolId == nil
+        ? config.rootPoolAccessTokenExpirationTime : config.accessTokenExpirationTime,
+      self.poolId == nil
+        ? config.rootPoolRefreshTokenExpirationTime : config.refreshTokenExpirationTime
+    )
   }
 
 }

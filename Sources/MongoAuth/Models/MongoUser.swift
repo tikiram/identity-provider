@@ -15,7 +15,7 @@ struct MongoUser: Model, User, UserEmailMethod {
   }
 
   @Field var _id: String
-  @Field var poolId: String
+  @Field var poolId: String?
   
   @Field var createdAt: Date
   

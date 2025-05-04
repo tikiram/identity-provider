@@ -6,17 +6,19 @@ public final class MongoUserRepo: UserRepo {
 
   private let mongoDatabase: MongoDatabase
   private let tableName: String
-  private let poolId: String
+  private let poolId: String?
 
   public init(
     _ mongoDatabase: MongoDatabase,
     _ tableName: String,
-    _ poolId: String
+    _ poolId: String?
   ) {
     self.mongoDatabase = mongoDatabase
     self.tableName = tableName
     self.poolId = poolId
   }
+
+  // TODO: validate pool id exists if received
 
   public func create(email: String, passwordHash: String) async throws -> User {
     let users = getCollection()

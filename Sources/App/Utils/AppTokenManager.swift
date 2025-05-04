@@ -10,8 +10,8 @@ final class AppTokenManager: TokenManager {
   private let refreshTokenExpirationTime: TimeInterval
 
   init(
-    _ jwt: Request.JWT,
-    _ kid: String,
+    jwt: Request.JWT,
+    kid: String,
     _ accessTokenExpirationTime: TimeInterval,
     _ refreshTokenExpirationTime: TimeInterval,
   ) {

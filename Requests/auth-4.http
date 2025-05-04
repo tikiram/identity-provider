@@ -6,6 +6,7 @@ Accept: application/json
 POST {{host}}/b/v1/auth/register
 Content-Type: application/json
 x-client-type: service
+x-pool-id: iia_dev
 
 {
   "email": "test3@test.com",
@@ -22,6 +23,7 @@ x-client-type: service
 POST {{host}}/b/v1/auth/login
 Content-Type: application/json
 x-client-type: service
+x-pool-id: iia_dev
 
 {
   "email": "test3@test.com",
@@ -38,6 +40,7 @@ x-client-type: service
 POST {{host}}/b/v1/auth/refresh
 Content-Type: application/json
 x-client-type: service
+x-pool-id: iia_dev
 
 {
   "refresh_token": "{{refresh_token}}"
@@ -48,15 +51,3 @@ x-client-type: service
     client.global.set("refresh_token", response.body.refresh_token);
 %}
 
-
-### pools
-
-POST {{host}}/b/v1/pools
-Content-Type: application/json
-Authorization: Bearer {{access_token}}
-
-{
-  "kid": "iia_dev",
-  "private_key": "test",
-  "public_key": "test"
-}

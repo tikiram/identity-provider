@@ -1,17 +1,21 @@
-import JWT
-import MongoAuth
-import MongoKitten
 import SharedBackend
 import Vapor
+
+private let MINUTE: TimeInterval = 60
+private let HOUR = 60 * MINUTE
+private let DAY = 24 * HOUR
 
 public func configure(_ app: Application) async throws {
 
   app.http.server.configuration.port = 3000
   //  app.middleware.use(RepoErrorMiddleware())
 
-  app.masterPoolConfig = MasterPoolConfig(
-    accessTokenExpirationTime: 60 * 5,
-    refreshTokenExpirationTime: 60 * 15
+  app.poolsConfig = PoolsConfig(
+    accessTokenExpirationTime: 15 * MINUTE,
+    refreshTokenExpirationTime: 7 * DAY,
+    rootPoolKid: "_master",
+    rootPoolAccessTokenExpirationTime: 5 * MINUTE,
+    rootPoolRefreshTokenExpirationTime: 15 * MINUTE
   )
 
   app.mongoNames = MongoNames(
@@ -26,43 +30,10 @@ public func configure(_ app: Application) async throws {
   appUtils.setCompanyStandardJSONEncoderDecoder()
 
   try await app.configureMongo()
-  try await app.setMasterPoolKey()
+  try await app.loadMongoPoolKeys()
 
-  // TODO: load more keys
+  try await app.setMasterPoolKey()
 
   // register routes
   try routes(app)
-}
-
-extension Application {
-  func setMasterPoolKey() async throws {
-    guard let oneLinePrivateKeyString = Environment.get("MASTER_POOL_PRIVATE_KEY") else {
-      throw RuntimeError("MASTER_POOL_PRIVATE_KEY not defined")
-    }
-    let privateKeyString = oneLinePrivateKeyString.replacingOccurrences(of: "\\n", with: "\n")
-
-    // ECDSA - es256
-    let privateKey = try ES256PrivateKey(pem: privateKeyString)
-
-    await self.jwt.keys.add(ecdsa: privateKey, kid: "master")
-  }
-}
-
-extension Application {
-  func configureMongo() async throws {
-    guard let MONGO_DB = Environment.get("MONGO_DB") else {
-      throw RuntimeError("MONGO_DB not defined")
-    }
-
-    try await self.initializeMongoDB(MONGO_DB)
-
-    guard let mongoNames = self.mongoNames else {
-      throw RuntimeError("MongoNames not defined")
-    }
-
-    let manager = MongoAuthManager(self.mongo)
-    try await manager.configureUsers(mongoNames.users)
-    try await manager.configureSession(mongoNames.sessions)
-    try await manager.configureUserPool(mongoNames.pools, mongoNames.userPools)
-  }
 }

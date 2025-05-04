@@ -30,7 +30,7 @@ public class MongoUserPoolRepo: UserPoolRepo {
 
     let pool = MongoPool(
       _id: serializedKid,
-      userId: self.userId,
+      createdBy: self.userId,
       encryptedPrivateKey: encryptedPrivateKey,
       encryptedPublicKey: encryptedPublicKey,
       createdAt: Date()

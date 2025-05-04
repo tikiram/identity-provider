@@ -11,7 +11,7 @@ struct MongoPool: Model, Pool {
   @Field var _id: String
   
   /// Original creator of the pool
-  @Field var userId: String
+  @Field var createdBy: String
 
   @Field var encryptedPrivateKey: String
   @Field var encryptedPublicKey: String

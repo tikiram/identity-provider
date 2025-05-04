@@ -51,14 +51,14 @@ extension Response {
     case .web:
       let responseContent = LiteTokensResponse(
         accessToken: tokens.accessTokenInfo.value,
-        expiresIn: tokens.refreshTokenInfo.expiresIn,
+        expiresIn: tokens.accessTokenInfo.expiresIn,
       )
       try self.content.encode(responseContent, as: .json)
 
     case .mobile, .service:
       let responseContent = TokensResponse(
         accessToken: tokens.accessTokenInfo.value,
-        expiresIn: tokens.refreshTokenInfo.expiresIn,
+        expiresIn: tokens.accessTokenInfo.expiresIn,
         refreshToken: tokens.refreshTokenInfo.value,
         refreshTokenExpiresIn: tokens.refreshTokenInfo.expiresIn
       )

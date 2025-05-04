@@ -1,17 +1,9 @@
 import SharedBackend
 import Vapor
 
-private let masterPoolName = "master"
-
 extension Request {
-  var poolId: String {
-    let value = self.headers.first(name: "x-pool-id") ?? ""
-
-    guard !value.isEmpty else {
-      return masterPoolName
-    }
-
-    return value
+  var poolId: String? {
+    self.headers.first(name: "x-pool-id")
   }
 }
 
