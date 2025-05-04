@@ -13,7 +13,7 @@ final class AppTokenManager: TokenManager {
     jwt: Request.JWT,
     kid: String,
     _ accessTokenExpirationTime: TimeInterval,
-    _ refreshTokenExpirationTime: TimeInterval,
+    _ refreshTokenExpirationTime: TimeInterval
   ) {
     self.jwt = jwt
     self.kid = kid

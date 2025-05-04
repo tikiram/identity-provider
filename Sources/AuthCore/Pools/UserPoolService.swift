@@ -5,7 +5,7 @@ public class UserPoolService {
 
   public init(
     _ userPoolRepo: UserPoolRepo,
-    _ encryptor: DataCipher,
+    _ encryptor: DataCipher
   ) {
     self.userPoolRepo = userPoolRepo
     self.cipher = encryptor
