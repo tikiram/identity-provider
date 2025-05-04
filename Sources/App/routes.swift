@@ -9,18 +9,27 @@ func routes(_ app: Application) throws {
     "Hello, world!"
   }
 
-  //  try app.grouped(app.sessions.middleware).register(collection: AuthControler())
-  try app.register(collection: AuthControler())
+  try app.group("b") { b in
+    try b.group("v1") { v1 in
+      try v1.register(collection: BAuthControler())
+
+      let secure = v1.grouped(
+        AppTokenPayload.authenticator(),
+        AppTokenPayload.guardMiddleware())
+
+      try secure.register(collection: PoolsControler())
+    }
+  }
 
   let secure =
     app
     .grouped(
-      TokenPayload.authenticator(),
-      TokenPayload.guardMiddleware()
+      AppTokenPayload.authenticator(),
+      AppTokenPayload.guardMiddleware()
     )
 
-  secure.get("info") { req -> TokenPayload in
-    let payload = try req.auth.require(TokenPayload.self)
+  secure.get("info") { req -> AppTokenPayload in
+    let payload = try req.auth.require(AppTokenPayload.self)
     return payload
   }
 }

@@ -1,0 +1,53 @@
+GET {{host}}
+Accept: application/json
+
+### Register
+
+POST {{host}}/b/v1/auth/register
+Content-Type: application/json
+x-client-type: service
+x-pool-id: iia_dev
+
+{
+  "email": "test3@test.com",
+  "password": "test"
+}
+
+> {%
+    client.global.set("access_token", response.body.access_token);
+    client.global.set("refresh_token", response.body.refresh_token);
+%}
+
+### Sign In
+
+POST {{host}}/b/v1/auth/login
+Content-Type: application/json
+x-client-type: service
+x-pool-id: iia_dev
+
+{
+  "email": "test3@test.com",
+  "password": "test"
+}
+
+> {%
+    client.global.set("access_token", response.body.access_token);
+    client.global.set("refresh_token", response.body.refresh_token);
+%}
+
+### Refresh
+
+POST {{host}}/b/v1/auth/refresh
+Content-Type: application/json
+x-client-type: service
+x-pool-id: iia_dev
+
+{
+  "refresh_token": "{{refresh_token}}"
+}
+
+> {%
+    client.global.set("access_token", response.body.access_token);
+    client.global.set("refresh_token", response.body.refresh_token);
+%}
+
