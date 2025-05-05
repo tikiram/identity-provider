@@ -1,0 +1,11 @@
+### pools
+
+POST {{host}}/b/v1/pools
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "kid": "iia_random",
+  "private_key": "--",
+  "public_key": "--"
+}

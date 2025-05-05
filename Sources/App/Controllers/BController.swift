@@ -26,10 +26,10 @@ struct BAuthControler: RouteCollection {
 
     let auth = try req.bAuth()
 
-    let tokens = try await auth.register(payload.email, payload.password)
+    let (user, tokens) = try await auth.register(payload.email, payload.password)
 
     let response = Response()
-    try response.handleTokens(req.clientType, tokens)
+    try response.handlePayload(req.clientType, user: user, tokens: tokens)
     return response
   }
 
@@ -49,10 +49,10 @@ struct BAuthControler: RouteCollection {
 
     let auth = try req.bAuth()
 
-    let tokens = try await auth.login(payload.email, payload.password)
+    let (user, tokens) = try await auth.login(payload.email, payload.password)
 
     let response = Response()
-    try response.handleTokens(req.clientType, tokens)
+    try response.handlePayload(req.clientType, user: user, tokens: tokens)
     return response
   }
 
@@ -94,7 +94,7 @@ struct BAuthControler: RouteCollection {
     let tokens = try await auth.refreshToken(payload.refreshToken)
 
     let response = Response()
-    try response.handleTokens(req.clientType, tokens)
+    try response.handlePayload(req.clientType, tokens: tokens)
     return response
 
   }

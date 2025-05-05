@@ -13,14 +13,16 @@ public class Auth {
     self.sessionService = sessionService
   }
 
-  public func register(_ email: String, _ password: String) async throws -> Tokens {
+  public func register(_ email: String, _ password: String) async throws -> (User, Tokens) {
     let user = try await userService.create(email, password)
-    return try await sessionService.create(user)
+    let tokens = try await sessionService.create(user)
+    return (user, tokens)
   }
 
-  public func login(_ email: String, _ password: String) async throws -> Tokens {
+  public func login(_ email: String, _ password: String) async throws -> (User, Tokens) {
     let user = try await userService.authenticate(email, password)
-    return try await sessionService.create(user)
+    let tokens = try await sessionService.create(user)
+    return (user, tokens)
   }
 
   public func refreshToken(_ refreshToken: String) async throws -> Tokens {

@@ -27,6 +27,9 @@ struct PoolsControler: RouteCollection {
 
     try await userPoolService.create(payload.kid, payload.privateKey, payload.publicKey)
 
+    // TODO: add key to the local keys storage
+    //req.application.jwt.keys.add(ecdsa: ECDSAKey)
+
     return .noContent
   }
 }

@@ -8,7 +8,7 @@ Content-Type: application/json
 x-client-type: service
 
 {
-  "email": "test5@test.com",
+  "email": "test@test.com",
   "password": "test"
 }
 
@@ -24,8 +24,8 @@ Content-Type: application/json
 x-client-type: service
 
 {
-  "email": "test3@test.com",
-  "password": "test2"
+  "email": "test@test.com",
+  "password": "test1234"
 }
 
 > {%
@@ -59,14 +59,3 @@ x-client-type: service
 }
 
 
-### pools
-
-POST {{host}}/b/v1/pools
-Content-Type: application/json
-Authorization: Bearer {{access_token}}
-
-{
-  "kid": "iia_dev",
-  "private_key": "test",
-  "public_key": "test"
-}

@@ -46,12 +46,13 @@ extension Response {
 
 extension Response {
 
-  func handleTokens(_ clientType: ClientType, _ tokens: Tokens) throws {
+    func handlePayload(_ clientType: ClientType, tokens: Tokens) throws {
     switch clientType {
     case .web:
       let responseContent = LiteTokensResponse(
         accessToken: tokens.accessTokenInfo.value,
-        expiresIn: tokens.accessTokenInfo.expiresIn
+        expiresIn: tokens.accessTokenInfo.expiresIn,
+        payload: nil
       )
       try self.content.encode(responseContent, as: .json)
 
@@ -60,7 +61,31 @@ extension Response {
         accessToken: tokens.accessTokenInfo.value,
         expiresIn: tokens.accessTokenInfo.expiresIn,
         refreshToken: tokens.refreshTokenInfo.value,
-        refreshTokenExpiresIn: tokens.refreshTokenInfo.expiresIn
+        refreshTokenExpiresIn: tokens.refreshTokenInfo.expiresIn,
+        payload: nil
+      )
+      try self.content.encode(responseContent, as: .json)
+      self.setRefreshTokenCookie(tokens.refreshTokenInfo)
+    }
+  }
+
+  func handlePayload(_ clientType: ClientType, user: User, tokens: Tokens) throws {
+    switch clientType {
+    case .web:
+      let responseContent = LiteTokensResponse(
+        accessToken: tokens.accessTokenInfo.value,
+        expiresIn: tokens.accessTokenInfo.expiresIn,
+        payload: UserPayload(userId: user.id)
+      )
+      try self.content.encode(responseContent, as: .json)
+
+    case .mobile, .service:
+      let responseContent = TokensResponse(
+        accessToken: tokens.accessTokenInfo.value,
+        expiresIn: tokens.accessTokenInfo.expiresIn,
+        refreshToken: tokens.refreshTokenInfo.value,
+        refreshTokenExpiresIn: tokens.refreshTokenInfo.expiresIn,
+        payload: UserPayload(userId: user.id)
       )
       try self.content.encode(responseContent, as: .json)
       self.setRefreshTokenCookie(tokens.refreshTokenInfo)
@@ -69,13 +94,19 @@ extension Response {
 
 }
 
+private struct UserPayload: Content {
+  let userId: String
+}
+
 private struct LiteTokensResponse: Content {
   let accessToken: String
   let expiresIn: Double
+  let payload: UserPayload?
 }
 private struct TokensResponse: Content {
   let accessToken: String
   let expiresIn: Double
   let refreshToken: String
   let refreshTokenExpiresIn: Double
+  let payload: UserPayload?
 }

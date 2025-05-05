@@ -6,10 +6,10 @@ Accept: application/json
 POST {{host}}/b/v1/auth/register
 Content-Type: application/json
 x-client-type: service
-x-pool-id: iia_dev
+x-pool-id: iia_random
 
 {
-  "email": "test3@test.com",
+  "email": "test@test.com",
   "password": "test"
 }
 
@@ -26,8 +26,8 @@ x-client-type: service
 x-pool-id: iia_dev
 
 {
-  "email": "test3@test.com",
-  "password": "test"
+  "email": "test@test.com",
+  "password": "test1234"
 }
 
 > {%
@@ -50,4 +50,5 @@ x-pool-id: iia_dev
     client.global.set("access_token", response.body.access_token);
     client.global.set("refresh_token", response.body.refresh_token);
 %}
+
 

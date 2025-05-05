@@ -41,6 +41,7 @@ extension Application {
     // TODO: should load keys from the database rather than checking the env file
 
     for pool in pools {
+      print("- key: \(pool.id) loaded")
       try await self.setJWTKeyFromEnv(name: "POOL_\(pool.id)", kid: pool.id)
     }
 
