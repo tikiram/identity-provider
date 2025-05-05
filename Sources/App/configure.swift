@@ -19,10 +19,10 @@ public func configure(_ app: Application) async throws {
   )
 
   app.mongoNames = MongoNames(
-    users: "b_users",
-    sessions: "b_sessions",
-    pools: "b_pools",
-    userPools: "b_user_pools"
+    users: "auth_users",
+    sessions: "auth_sessions",
+    pools: "auth_pools",
+    userPools: "auth_user_pools"
   )
 
   let appUtils = AppUtils(app)
