@@ -51,7 +51,7 @@ extension Response {
     case .web:
       let responseContent = LiteTokensResponse(
         accessToken: tokens.accessTokenInfo.value,
-        expiresIn: tokens.accessTokenInfo.expiresIn,
+        expiresIn: tokens.accessTokenInfo.expiresIn
       )
       try self.content.encode(responseContent, as: .json)
 

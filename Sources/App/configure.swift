@@ -22,7 +22,7 @@ public func configure(_ app: Application) async throws {
     users: "b_users",
     sessions: "b_sessions",
     pools: "b_pools",
-    userPools: "b_user_pools",
+    userPools: "b_user_pools"
   )
 
   let appUtils = AppUtils(app)

@@ -18,7 +18,7 @@ public class MongoAuthManager {
       SortedIndex(
         by: [
           m.$poolId.path.string: .ascending,
-          m.$email.path.string: .ascending,
+          m.$email.path.string: .ascending
         ],
         named: "unique-email-within-realm"
       )
@@ -27,7 +27,7 @@ public class MongoAuthManager {
       SortedIndex(
         by: [
           m.$_id.path.string: .ascending,
-          m.$poolId.path.string: .ascending,
+          m.$poolId.path.string: .ascending
         ],
         named: "search-by-id-and-realm"
       )
@@ -35,7 +35,7 @@ public class MongoAuthManager {
       SortedIndex(
         by: [
           m.$poolId.path.string: .ascending,
-          m.$email.path.string: .ascending,
+          m.$email.path.string: .ascending
         ],
         named: "search-by-email-and-realm"
       )
@@ -53,7 +53,7 @@ public class MongoAuthManager {
         by: [
           m.$_id.path.string: .ascending,
           m.$refreshTokenHash.path.string: .ascending,
-          m.$loggedOutAt.path.string: .ascending,
+          m.$loggedOutAt.path.string: .ascending
         ],
         named: "search-index"
       )
@@ -74,7 +74,7 @@ public class MongoAuthManager {
       SortedIndex(
         by: [
           $0.$userId.path.string: .ascending,
-          $0.$poolId.path.string: .ascending,
+          $0.$poolId.path.string: .ascending
         ],
         named: "unique-user-pool"
       )
