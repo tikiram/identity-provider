@@ -9,23 +9,19 @@ struct AppTokenPayload: JWTPayload, Authenticatable, Content {
   enum CodingKeys: String, CodingKey {
     case subject = "sub"
     case expiration = "exp"
-    case roles = "roles"
   }
 
   let subject: SubjectClaim
   let expiration: ExpirationClaim
-
-  let roles: [String]
 
   var userId: String {
     return subject.value
   }
 
   /// duration: seconds
-  init(userId: String, roles: [String], duration: TimeInterval) {
+  init(userId: String, duration: TimeInterval) {
     subject = SubjectClaim(value: userId)
     expiration = ExpirationClaim(value: Date().addingTimeInterval(duration))
-    self.roles = roles
   }
 
   func verify(using algorithm: some JWTAlgorithm) async throws {
@@ -39,23 +35,20 @@ struct AppRefreshTokenPayload: JWTPayload, Authenticatable, Content, RefreshToke
     case subject = "sub"
     case expiration = "exp"
     case sessionId = "sid"
-    case roles = "roles"
   }
 
   let subject: SubjectClaim
   let expiration: ExpirationClaim
   let sessionId: String
-  let roles: [String]
 
   var userId: String {
     return subject.value
   }
 
-  init(userId: String, roles: [String], duration: TimeInterval, sessionId: String) {
+  init(userId: String, duration: TimeInterval, sessionId: String) {
     subject = SubjectClaim(value: userId)
     expiration = ExpirationClaim(value: Date().addingTimeInterval(duration))
     self.sessionId = sessionId
-    self.roles = roles
   }
 
   func verify(using algorithm: some JWTAlgorithm) async throws {

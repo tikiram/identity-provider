@@ -1,4 +1,4 @@
-import SharedBackend
+import VaporUtils
 import Vapor
 
 private let MINUTE: TimeInterval = 60

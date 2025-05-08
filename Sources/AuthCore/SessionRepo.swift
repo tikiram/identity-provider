@@ -12,18 +12,20 @@ public protocol SessionRepo {
   func save(
     userId: String,
     sessionId: String,
-    refreshToken: String
+    refreshTokenHash: String
   ) async throws
 
   func update(
+    userId: String,
     sessionId: String,
-    newRefreshToken: String,
-    previousRefreshToken: String
+    newRefreshTokenHash: String,
+    previousRefreshTokenHash: String
   ) async throws
 
   func invalidate(
+    userId: String,
     sessionId: String,
-    refreshToken: String
+    refreshTokenHash: String
   ) async throws
 
 }

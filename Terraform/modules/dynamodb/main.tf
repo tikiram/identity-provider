@@ -4,7 +4,13 @@ resource "aws_dynamodb_table" "user" {
 
   billing_mode = "PAY_PER_REQUEST"
 
-  hash_key = "id"
+  hash_key  = "poolId"
+  range_key = "id"
+
+  attribute {
+    name = "poolId"
+    type = "S"
+  }
 
   attribute {
     name = "id"
@@ -24,7 +30,13 @@ resource "aws_dynamodb_table" "user_email_method" {
   name         = "${var.table_name_prefix}_auth_user_email_method"
   billing_mode = "PAY_PER_REQUEST"
 
-  hash_key = "email"
+  hash_key  = "poolId"
+  range_key = "email"
+
+  attribute {
+    name = "poolId"
+    type = "S"
+  }
 
   attribute {
     name = "email"
@@ -41,7 +53,7 @@ resource "aws_dynamodb_table" "session" {
   billing_mode = "PAY_PER_REQUEST"
 
   hash_key  = "userId"
-  range_key = "subId"
+  range_key = "id"
 
   attribute {
     name = "userId"
@@ -49,7 +61,26 @@ resource "aws_dynamodb_table" "session" {
   }
 
   attribute {
-    name = "subId"
+    name = "id"
+    type = "S"
+  }
+}
+
+resource "aws_dynamodb_table" "pool" {
+  name = "${var.table_name_prefix}_auth_pool"
+
+  billing_mode = "PAY_PER_REQUEST"
+
+  hash_key  = "createdBy"
+  range_key = "id"
+
+  attribute {
+    name = "createdBy"
+    type = "S"
+  }
+
+  attribute {
+    name = "id"
     type = "S"
   }
 }

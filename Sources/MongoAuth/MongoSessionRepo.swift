@@ -6,22 +6,18 @@ public class MongoSessionRepo: SessionRepo {
 
   private let mongoDatabase: MongoDatabase
   private let tableName: String
-  private let simpleHashser: SimpleHasher
+  // private let simpleHashser: SimpleHasher
 
   public init(
     _ mongoDatabase: MongoDatabase,
-    _ tableName: String,
-    _ simpleHasher: SimpleHasher
+    _ tableName: String
   ) {
     self.mongoDatabase = mongoDatabase
     self.tableName = tableName
-    self.simpleHashser = simpleHasher
   }
 
-  public func save(userId: String, sessionId: String, refreshToken: String) async throws {
+  public func save(userId: String, sessionId: String, refreshTokenHash: String) async throws {
     let sessions = getCollection()
-
-    let refreshTokenHash = self.simpleHashser.hash(refreshToken)
 
     let session = MongoSession(
       _id: sessionId,
@@ -39,23 +35,21 @@ public class MongoSessionRepo: SessionRepo {
   }
 
   public func update(
+    userId: String,  // not used but required by the protocol
     sessionId: String,
-    newRefreshToken: String,
-    previousRefreshToken: String
+    newRefreshTokenHash: String,
+    previousRefreshTokenHash: String
   ) async throws {
     let sessions = getCollection()
-
-    let previousHash = self.simpleHashser.hash(previousRefreshToken)
-    let refreshTokenHash = self.simpleHashser.hash(newRefreshToken)
 
     let result = try await sessions.updateOne(
       matching: {
         $0.$_id == sessionId
-          && $0.$refreshTokenHash == previousHash
+          && $0.$refreshTokenHash == previousRefreshTokenHash
           && $0.$loggedOutAt == nil
       },
       build: {
-        $0.setField(at: \.$refreshTokenHash, to: refreshTokenHash)
+        $0.setField(at: \.$refreshTokenHash, to: newRefreshTokenHash)
         $0.setField(at: \.$lastAccessedAt, to: Date())
       }
     )
@@ -65,15 +59,17 @@ public class MongoSessionRepo: SessionRepo {
     }
   }
 
-  public func invalidate(sessionId: String, refreshToken: String) async throws {
+  public func invalidate(
+    userId: String,  // not used but required by the protocol
+    sessionId: String,
+    refreshTokenHash: String
+  ) async throws {
     let sessions = getCollection()
-
-    let previousHash = self.simpleHashser.hash(refreshToken)
 
     let result = try await sessions.updateOne(
       matching: {
         $0.$_id == sessionId
-          && $0.$refreshTokenHash == previousHash
+          && $0.$refreshTokenHash == refreshTokenHash
           && $0.$loggedOutAt == nil
       },
       build: {

@@ -22,22 +22,21 @@ final class AppTokenManager: TokenManager {
   }
 
   func buildTokens(_ user: any User, sessionId: String) async throws -> Tokens {
-    let accessToken = try await getAccessToken(user.id, user.roles)
-    let refreshToken = try await getRefreshToken(user.id, user.roles, sessionId)
+    let accessToken = try await getAccessToken(user.id)
+    let refreshToken = try await getRefreshToken(user.id, sessionId)
     return Tokens(accessToken, refreshToken)
   }
 
   func buildTokens(_ refreshToken: String) async throws -> Tokens {
     let payload = try await jwt.verify(refreshToken, as: AppRefreshTokenPayload.self)
-    let accessToken = try await getAccessToken(payload.userId, payload.roles)
-    let refreshToken = try await getRefreshToken(payload.userId, payload.roles, payload.sessionId)
+    let accessToken = try await getAccessToken(payload.userId)
+    let refreshToken = try await getRefreshToken(payload.userId, payload.sessionId)
     return Tokens(accessToken, refreshToken)
   }
 
-  private func getAccessToken(_ userId: String, _ roles: [String]) async throws -> TokenInfo {
+  private func getAccessToken(_ userId: String) async throws -> TokenInfo {
     let payload = AppTokenPayload(
       userId: userId,
-      roles: roles,
       duration: self.accessTokenExpirationTime
     )
     let value = try await jwt.sign(payload, kid: JWKIdentifier(string: self.kid))
@@ -45,12 +44,11 @@ final class AppTokenManager: TokenManager {
     return TokenInfo(value: value, expiresIn: self.accessTokenExpirationTime)
   }
 
-  private func getRefreshToken(_ userId: String, _ roles: [String], _ sessionId: String)
+  private func getRefreshToken(_ userId: String, _ sessionId: String)
     async throws -> TokenInfo
   {
     let refreshTokenPayload = AppRefreshTokenPayload(
       userId: userId,
-      roles: roles,
       duration: self.refreshTokenExpirationTime,
       sessionId: sessionId
     )

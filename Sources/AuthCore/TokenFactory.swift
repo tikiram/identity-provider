@@ -3,7 +3,6 @@ import Foundation
 public protocol RefreshTokenPayload {
   var userId: String { get }
   var sessionId: String { get }
-  var roles: [String] { get }
 }
 
 public struct TokenInfo {

@@ -32,8 +32,14 @@ brew install hashicorp/tap/terraform
 terraform --help
 
 terraform init
+
+```bash
 terraform plan
+```
+
+```bash
 terraform apply
+```
 
 ## Run
 

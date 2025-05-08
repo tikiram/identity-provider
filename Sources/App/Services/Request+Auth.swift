@@ -1,7 +1,7 @@
 import AuthCore
 import JWTKit
 import MongoAuth
-import SharedBackend
+import Utils
 import Vapor
 
 extension Request {
@@ -26,7 +26,7 @@ extension Request {
     let userRepo = MongoUserRepo(self.mongo, mongoNames.users, poolId)
     let userService = UserService(userRepo, self.password.async)
 
-    let sessionRepo = MongoSessionRepo(self.mongo, mongoNames.sessions, self.simpleHasher)
+    let sessionRepo = MongoSessionRepo(self.mongo, mongoNames.sessions)
 
     let config = try self.application.getPoolConfig()
 
@@ -36,7 +36,7 @@ extension Request {
       accessTokenExpirationTime,
       refreshTokenExpirationTime
     )
-    let sessionService = SessionService(sessionRepo, tokenManager)
+    let sessionService = SessionService(sessionRepo, tokenManager, self.simpleHasher)
 
     return Auth(userService, sessionService)
   }

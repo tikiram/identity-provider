@@ -1,5 +1,5 @@
 import JWT
-import SharedBackend
+import Utils
 import Vapor
 
 extension Application {

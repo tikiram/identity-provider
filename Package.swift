@@ -18,7 +18,7 @@ let package = Package(
     // MongoDB
     .package(url: "https://github.com/orlandos-nl/MongoKitten.git", from: "7.9.9"),
     // Shared
-    .package(url: "https://github.com/tikiram/vapor-utils.git", from: "0.10.0"),
+    .package(url: "https://github.com/tikiram/swift-be-utils.git", from: "0.13.0"),
   ],
   targets: [
     .executableTarget(
@@ -26,14 +26,16 @@ let package = Package(
       dependencies: [
         .product(name: "Vapor", package: "vapor"),
         .product(name: "JWT", package: "jwt"),
-        .product(name: "AWSDynamoDB", package: "aws-sdk-swift"),
-        .product(name: "MongoKitten", package: "MongoKitten"),
-        .product(name: "Meow", package: "MongoKitten"),
-        .product(name: "SharedBackend", package: "vapor-utils"),
+        // .product(name: "AWSDynamoDB", package: "aws-sdk-swift"),
+        // .product(name: "MongoKitten", package: "MongoKitten"),
+        // .product(name: "Meow", package: "MongoKitten"),
+        .product(name: "Utils", package: "swift-be-utils"),
+        .product(name: "VaporUtils", package: "swift-be-utils"),
         .product(name: "NIOCore", package: "swift-nio"),
         .product(name: "NIOPosix", package: "swift-nio"),
         "AuthCore",
         "MongoAuth",
+        "DynamoAuth",
       ],
       swiftSettings: swiftSettings
     ),
@@ -45,6 +47,13 @@ let package = Package(
       ],
       swiftSettings: swiftSettings
     ),
+    .target(
+      name: "DynamoAuth",
+      dependencies: [
+        "AuthCore",
+        .product(name: "AWSDynamoDB", package: "aws-sdk-swift"),
+        .product(name: "DynamoUtils", package: "swift-be-utils"),
+      ]),
     .target(
       name: "MongoAuth",
       dependencies: [

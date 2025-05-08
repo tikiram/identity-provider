@@ -1,5 +1,5 @@
 {
-  "originHash" : "afa99b88220d850f76ef56124f3986f8c2f4270998d654f52f76a5294813dfa2",
+  "originHash" : "a65a4ca26a96d7ea0c45a98bf0907186a6604601e372cfd41fae25c0a50dc4a4",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -143,6 +143,15 @@
       "state" : {
         "revision" : "cd142fd2f64be2100422d658e7411e39489da985",
         "version" : "1.2.0"
+      }
+    },
+    {
+      "identity" : "swift-be-utils",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tikiram/swift-be-utils.git",
+      "state" : {
+        "revision" : "21e7832496330816c1d976bbce2a5c23ca46923f",
+        "version" : "0.13.0"
       }
     },
     {
@@ -296,15 +305,6 @@
       "state" : {
         "revision" : "87b0edd2633c35de543cb7573efe5fbf456181bc",
         "version" : "4.114.1"
-      }
-    },
-    {
-      "identity" : "vapor-utils",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/tikiram/vapor-utils.git",
-      "state" : {
-        "revision" : "221ace2b213db08766479da61351ef048799bddd",
-        "version" : "0.10.0"
       }
     },
     {

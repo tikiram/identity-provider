@@ -18,8 +18,6 @@ struct MongoUser: Model, User, UserEmailMethod {
   @Field var poolId: String?
   
   @Field var createdAt: Date
-  
-  @Field var roles: [String]
 
   @Field var email: String // Unique within a pool
   @Field var passwordHash: String

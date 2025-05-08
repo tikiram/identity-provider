@@ -31,7 +31,6 @@ public final class MongoUserRepo: UserRepo {
       _id: uniqueId,
       poolId: self.poolId,
       createdAt: Date(),
-      roles: [],
       email: serializedEmail,
       passwordHash: passwordHash
     )
