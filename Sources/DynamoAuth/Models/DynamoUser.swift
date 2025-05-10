@@ -5,7 +5,7 @@ import DynamoUtils
 
 struct DynamoUser: User {
 
-  let poolId: String?  // partition key
+  let poolId: String  // partition key
   let id: String  // sort key
 
   //

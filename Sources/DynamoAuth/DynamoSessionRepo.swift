@@ -3,17 +3,17 @@ import AuthCore
 import DynamoUtils
 import Foundation
 
-class DynamoSessionRepo: SessionRepo {
+public class DynamoSessionRepo: SessionRepo {
 
     private let client: DynamoDBClient
     private let tableName: String
 
-    init(client: DynamoDBClient, tableName: String) {
+    public init(_ client: DynamoDBClient, _ tableName: String) {
         self.client = client
         self.tableName = tableName
     }
 
-    func save(userId: String, sessionId: String, refreshTokenHash: String) async throws {
+    public func save(userId: String, sessionId: String, refreshTokenHash: String) async throws {
         // TODO: save ip, region and other related data, this can help to detect stolen refreshTokens
         let session = DynamoSession(
             userId: userId,
@@ -32,7 +32,7 @@ class DynamoSessionRepo: SessionRepo {
         let _ = try await client.putItem(input: input)
     }
 
-    func update(
+    public func update(
         userId: String,
         sessionId: String,
         newRefreshTokenHash: String,
@@ -65,7 +65,7 @@ class DynamoSessionRepo: SessionRepo {
 
     }
 
-    func invalidate(
+    public func invalidate(
         userId: String,
         sessionId: String,
         refreshTokenHash: String

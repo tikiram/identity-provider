@@ -1,9 +1,9 @@
-@preconcurrency import AWSDynamoDB
+import AWSDynamoDB
 import AuthCore
 import DynamoUtils
 import Foundation
 
-final class DynamoUserRepo: UserRepo {
+public class DynamoUserRepo: UserRepo {
 
   private let client: DynamoDBClient
   private let userTableName: String
@@ -22,7 +22,7 @@ final class DynamoUserRepo: UserRepo {
     self.poolId = poolId
   }
 
-  func create(email: String, passwordHash: String) async throws -> any User {
+  public func create(email: String, passwordHash: String) async throws -> any User {
     do {
       return try await createOnDynamo(email: email, passwordHash: passwordHash)
     } catch let error as TransactionCanceledException where conditionalCheckFailed(error) {
@@ -34,17 +34,17 @@ final class DynamoUserRepo: UserRepo {
     let uniqueID = UUID().uuidString
     let serializedEmail = email.trim().lowercased()
 
-    let user = DynamoUser(poolId: self.poolId, id: uniqueID, createdAt: Date())
+    let user = DynamoUser(poolId: self.poolId ?? "nojoda", id: uniqueID, createdAt: Date())
 
     let put1 = DynamoDBClientTypes.Put(
-      conditionExpression: "attribute_not_exists(id)",
+      // conditionExpression: "attribute_not_exists(id)",
       item: user.item(),
       tableName: self.userTableName
     )
     let item1 = DynamoDBClientTypes.TransactWriteItem(put: put1)
 
     let emailMethod = DynamoUserEmailMethod(
-      poolId: self.poolId,
+      poolId: self.poolId ?? "",
       email: serializedEmail,
       passwordHash: passwordHash,
       userId: uniqueID,
@@ -64,10 +64,10 @@ final class DynamoUserRepo: UserRepo {
     return user
   }
 
-  func getEmailMethod(_ email: String) async throws -> (any UserEmailMethod)? {
+  public func getEmailMethod(_ email: String) async throws -> (any UserEmailMethod)? {
     let serializedEmail = email.trim().lowercased()
 
-    let key = DynamoUserEmailMethodKey(poolId: self.poolId, email: serializedEmail)
+    let key = DynamoUserEmailMethodKey(poolId: self.poolId ?? "", email: serializedEmail)
 
     let input = GetItemInput(
       consistentRead: false,
@@ -84,7 +84,7 @@ final class DynamoUserRepo: UserRepo {
     return try DynamoUserEmailMethod(item)
   }
 
-  func getUser(userId: String) async throws -> any User {
+  public func getUser(userId: String) async throws -> any User {
     // TODO: implement this if needed, currently User only has the id field
     return DynamoUser(poolId: "", id: userId, createdAt: Date())
   }

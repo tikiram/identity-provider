@@ -1,6 +1,13 @@
+import AuthCore
 import Vapor
 
-struct BAuthControler: RouteCollection {
+struct AuthControler: RouteCollection, Sendable {
+
+  private let authSelector: @Sendable (_ req: Request) throws -> Auth
+
+  init(authSelector: @Sendable @escaping (_ req: Request) throws -> Auth) {
+    self.authSelector = authSelector
+  }
 
   func boot(routes: RoutesBuilder) throws {
     let auth = routes.grouped("auth")
@@ -24,7 +31,7 @@ struct BAuthControler: RouteCollection {
     try SignUpPayload.validate(content: req)
     let payload = try req.content.decode(SignUpPayload.self)
 
-    let auth = try req.bAuth()
+    let auth = try self.authSelector(req)
 
     let (user, tokens) = try await auth.register(payload.email, payload.password)
 

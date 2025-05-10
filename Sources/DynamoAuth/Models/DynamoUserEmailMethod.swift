@@ -4,7 +4,7 @@ import DynamoUtils
 import Foundation
 
 struct DynamoUserEmailMethodKey {
-  let poolId: String?  // partition key
+  let poolId: String  // partition key
   let email: String  // sort key
 
   func item() -> [String: DynamoDBClientTypes.AttributeValue] {
@@ -16,14 +16,14 @@ struct DynamoUserEmailMethodKey {
 }
 
 struct DynamoUserEmailMethod: UserEmailMethod {
-  let poolId: String?  // partition key
+  let poolId: String  // partition key
   let email: String  // sort key
 
   let passwordHash: String
   let userId: String
   let createdAt: Date
 
-  init(poolId: String?, email: String, passwordHash: String, userId: String, createdAt: Date) {
+  init(poolId: String, email: String, passwordHash: String, userId: String, createdAt: Date) {
     self.poolId = poolId
     self.email = email
     self.passwordHash = passwordHash
@@ -32,7 +32,7 @@ struct DynamoUserEmailMethod: UserEmailMethod {
   }
 
   init(_ attributes: [String: DynamoDBClientTypes.AttributeValue]) throws {
-    self.poolId = try extractOptionalString(attributes["poolId"])
+    self.poolId = try extractString(attributes["poolId"])
     self.email = try extractString(attributes["email"])
     self.passwordHash = try extractString(attributes["passwordHash"])
     self.userId = try extractString(attributes["userId"])

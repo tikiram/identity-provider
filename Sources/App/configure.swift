@@ -1,5 +1,5 @@
-import VaporUtils
 import Vapor
+import VaporUtils
 
 private let MINUTE: TimeInterval = 60
 private let HOUR = 60 * MINUTE
@@ -25,12 +25,22 @@ public func configure(_ app: Application) async throws {
     userPools: "auth_user_pools"
   )
 
+  let prefix = try app.environmentShortName
+
+  app.dynamoNames = DynamoNames(
+    users: "\(prefix)_auth_user",
+    userEmailMethod: "\(prefix)_auth_user_email_method",
+    sessions: "\(prefix)_auth_session",
+    pools: "\(prefix)_auth_pool"
+  )
+
   let appUtils = AppUtils(app)
   try appUtils.configureCors()
   appUtils.setCompanyStandardJSONEncoderDecoder()
 
+  try await app.initializeDynamo()
   try await app.configureMongo()
-  try await app.loadMongoPoolKeys()
+  try await app.loadKeys()
 
   try await app.setMasterPoolKey()
 

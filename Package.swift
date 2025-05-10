@@ -18,7 +18,7 @@ let package = Package(
     // MongoDB
     .package(url: "https://github.com/orlandos-nl/MongoKitten.git", from: "7.9.9"),
     // Shared
-    .package(url: "https://github.com/tikiram/swift-be-utils.git", from: "0.13.0"),
+    .package(url: "https://github.com/tikiram/swift-be-utils.git", from: "0.14.0"),
   ],
   targets: [
     .executableTarget(

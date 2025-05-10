@@ -2,7 +2,7 @@ import AWSDynamoDB
 import AuthCore
 import Foundation
 
-public class MongoUserPoolRepo: UserPoolRepo {
+public class DynamoUserPoolRepo: UserPoolRepo {
 
   private let client: DynamoDBClient
   private let tableName: String

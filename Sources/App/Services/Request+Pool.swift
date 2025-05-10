@@ -1,10 +1,11 @@
 import AuthCore
+import DynamoAuth
 import MongoAuth
 import Vapor
 
 extension Request {
 
-  func getUserPoolService(userId: String) throws -> UserPoolService {
+  private func getMongoUserPoolService(userId: String) throws -> UserPoolService {
     let mongoNames = try self.getMongoNames()
 
     let userPoolRepo = MongoUserPoolRepo(
@@ -16,9 +17,25 @@ extension Request {
     return UserPoolService(userPoolRepo, SimpleCipher())
   }
 
-  func getUserPoolService() throws -> UserPoolService {
+  private func getDynamoUserPoolService(userId: String) throws -> UserPoolService {
+    let dynamoNames = try self.application.getDynamoNames()
+
+    let userPoolRepo = DynamoUserPoolRepo(
+      self.application.dynamo,
+      dynamoNames.pools,
+      userId
+    )
+    return UserPoolService(userPoolRepo, SimpleCipher())
+  }
+
+  func getBUserPoolService() throws -> UserPoolService {
     let session = try self.getSession()
-    return try self.getUserPoolService(userId: session.userId)
+    return try self.getMongoUserPoolService(userId: session.userId)
+  }
+
+  func getCUserPoolService() throws -> UserPoolService {
+    let session = try self.getSession()
+    return try self.getMongoUserPoolService(userId: session.userId)
   }
 
 }
