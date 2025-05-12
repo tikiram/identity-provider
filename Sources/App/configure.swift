@@ -1,30 +1,11 @@
 import Vapor
 import VaporUtils
 
-// delete
-import DynamoAuth
-
-
 private let MINUTE: TimeInterval = 60
 private let HOUR = 60 * MINUTE
 private let DAY = 24 * HOUR
 
 public func configure(_ app: Application) async throws {
-
-
-  let perro = Perro(age: 2, number: 3, gato: Gato(table: 5))
-  
-  let c = StringsEncoding()
-  let encoder = OGEncoder(codingPath: [], userInfo: [:])
-  try perro.encode(to: encoder)
-
-  
-  // print("prro resultado")
-  // print(a.data.strings)
-
-
-
-
 
   app.http.server.configuration.port = 3000
   app.middleware.use(RepoErrorMiddleware())

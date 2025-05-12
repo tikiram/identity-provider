@@ -1,92 +1,74 @@
-protocol ValueMapper<R> {
-    associatedtype R
-
-    func map(_ value: Int) -> R
-    func map(_ value: String) -> R
-    func map(_ value: Bool) -> R
-    func map(_ value: Double) -> R
-    func map(_ value: Float) -> R
-    func map(_ value: [R]) -> R
-    func map(_ value: [String: R]) -> R
-    func mapNil() -> R
-
-}
-
 protocol Intention {
     func result<R>(_ valueMapper: any ValueMapper<R>) throws -> R
 }
 
-class ListIntention<R> {
-
-    public let valueMapper: any ValueMapper<R>
-
-    init(_ valueMapper: any ValueMapper<R>) {
-        self.valueMapper = valueMapper
-    }
-
-    func setFutureMap(_ index: Int) -> MapIntention<R> {
-        let childMapIntention = MapIntention<R>(valueMapper)
-        // children[key] = childMapIntention
-        return childMapIntention
-    }
-
-    // func result() throws -> R {
-
-    // }
+enum IntentionError: Error {
+    case emptyIntention
 }
 
-extension Int: Intention {
+class ListIntention: Intention {
+    private let path: [any CodingKey]
+    private var list: [Intention] = []
+
+    init(path: [any CodingKey]) {
+        self.path = path
+    }
+
     func result<R>(_ valueMapper: any ValueMapper<R>) throws -> R {
-        return valueMapper.map(self)
+        let result = try list.map { try $0.result(valueMapper) }
+        return valueMapper.map(result)
+    }
+
+    func add(_ value: Intention) {
+        list.append(value)
+    }
+    func addNil() {
+        list.append(NilIntention())
     }
 }
 
 class ValueIntention: Intention {
     private var value: Intention? = nil
 
-    func set(intention: Intention) {
+    func set(_ intention: Intention) {
         self.value = intention
+    }
+    func setNil() {
+        self.value = NilIntention()
     }
 
     func result<R>(_ valueMapper: any ValueMapper<R>) throws -> R {
         guard let value else {
-            fatalError()
+            throw IntentionError.emptyIntention
         }
         return try value.result(valueMapper)
     }
 }
 
-// struct IntIntention: Intention {
-//     let value: Int
-
-//     func result<R>(_ valueMapper: any ValueMapper<R>) throws -> R {
-//         return valueMapper.map(value)
-//     }
-// }
+class NilIntention: Intention {
+    func result<R>(_ valueMapper: any ValueMapper<R>) throws -> R {
+        return valueMapper.mapNil()
+    }
+}
 
 class MapIntention: Intention {
+    private let path: [any CodingKey]
+
     private var map: [String: Intention] = [:]
 
-    func createMap() -> [String: String] {
-        // let pendingEntries = children.mapValues { mapIntention in
-        //     let resultMap = mapIntention.createMap()
-        //     let result = valueMapper.map(resultMap)
-        //     return result
-        // }
-        // return map.merging(pendingEntries) { (_, new) in new }
-        return [:]
+    init(path: [any CodingKey]) {
+        self.path = path
     }
 
     func result<R>(_ valueMapper: any ValueMapper<R>) throws -> R {
-
+        let result = try map.mapValues { try $0.result(valueMapper) }
+        return valueMapper.map(result)
     }
 
-    // func result() -> R {
-    //     let map = createMap()
-    //     return valueMapper.map(map)
-    // }
-
-    func set(_ key: String, _ value: Intention) {
-        map[key] = value
+    func set(_ key: CodingKey, _ value: Intention) {
+        map[key.stringValue] = value
+    }
+    func setNil(_ key: CodingKey) {
+        map[key.stringValue] = NilIntention()
     }
 }
