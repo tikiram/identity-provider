@@ -3,12 +3,15 @@ import AuthCore
 import DynamoUtils
 import Foundation
 
+// DynamoDB needs a non empty value as partition key
+private let MASTER_POOL_ID = "<master>"
+
 public class DynamoUserRepo: UserRepo {
 
   private let client: DynamoDBClient
   private let userTableName: String
   private let emailMethodTableName: String
-  private let poolId: String?
+  private let poolId: String
 
   public init(
     _ client: DynamoDBClient,
@@ -19,7 +22,7 @@ public class DynamoUserRepo: UserRepo {
     self.client = client
     self.userTableName = userTableName
     self.emailMethodTableName = emailMethodTableName
-    self.poolId = poolId
+    self.poolId = poolId ?? MASTER_POOL_ID
   }
 
   public func create(email: String, passwordHash: String) async throws -> any User {
@@ -34,7 +37,7 @@ public class DynamoUserRepo: UserRepo {
     let uniqueID = UUID().uuidString
     let serializedEmail = email.trim().lowercased()
 
-    let user = DynamoUser(poolId: self.poolId ?? "nojoda", id: uniqueID, createdAt: Date())
+    let user = DynamoUser(poolId: self.poolId, id: uniqueID, createdAt: Date())
 
     let put1 = DynamoDBClientTypes.Put(
       // conditionExpression: "attribute_not_exists(id)",
@@ -44,7 +47,7 @@ public class DynamoUserRepo: UserRepo {
     let item1 = DynamoDBClientTypes.TransactWriteItem(put: put1)
 
     let emailMethod = DynamoUserEmailMethod(
-      poolId: self.poolId ?? "",
+      poolId: self.poolId,
       email: serializedEmail,
       passwordHash: passwordHash,
       userId: uniqueID,
@@ -67,7 +70,7 @@ public class DynamoUserRepo: UserRepo {
   public func getEmailMethod(_ email: String) async throws -> (any UserEmailMethod)? {
     let serializedEmail = email.trim().lowercased()
 
-    let key = DynamoUserEmailMethodKey(poolId: self.poolId ?? "", email: serializedEmail)
+    let key = DynamoUserEmailMethodKey(poolId: self.poolId, email: serializedEmail)
 
     let input = GetItemInput(
       consistentRead: false,
