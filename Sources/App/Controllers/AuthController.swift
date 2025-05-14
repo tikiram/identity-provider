@@ -63,47 +63,51 @@ struct AuthControler: RouteCollection, Sendable {
     return response
   }
 
-  private struct LogoutPayload: Content, Validatable {
-    let refreshToken: String
-
-    static func validations(_ validations: inout Validations) {
-      validations.add("refreshToken", as: String.self, is: !.empty)
-    }
-  }
   @Sendable
   func logout(_ req: Request) async throws -> Response {
-    try LogoutPayload.validate(content: req)
-    let payload = try req.content.decode(LogoutPayload.self)
+    let refreshToken = try req.getRefreshToken()
 
     let auth = try self.authSelector(req)
 
-    try await auth.logout(payload.refreshToken)
+    try await auth.logout(refreshToken)
 
     let response = Response(status: .noContent)
     response.removeRefreshTokenCookie()
     return response
   }
 
-  private struct RefreshPayload: Content, Validatable {
-    let refreshToken: String
-
-    static func validations(_ validations: inout Validations) {
-      validations.add("refreshToken", as: String.self, is: !.empty)
-    }
-  }
   @Sendable
   func refresh(_ req: Request) async throws -> Response {
-    try RefreshPayload.validate(content: req)
-    let payload = try req.content.decode(RefreshPayload.self)
+    let refreshToken = try req.getRefreshToken()
 
     let auth = try self.authSelector(req)
 
-    let tokens = try await auth.refreshToken(payload.refreshToken)
+    let tokens = try await auth.refreshToken(refreshToken)
 
     let response = Response()
     try response.handlePayload(req.clientType, tokens: tokens)
     return response
 
   }
+}
 
+private struct RefreshPayload: Content, Validatable {
+  let refreshToken: String
+
+  static func validations(_ validations: inout Validations) {
+    validations.add("refreshToken", as: String.self, is: !.empty)
+  }
+}
+
+extension Request {
+  fileprivate func getRefreshToken() throws -> String {
+    switch try self.clientType {
+    case .web:
+      return try self.getRefreshTokenFromCookie()
+    case .mobile, .service:
+      try RefreshPayload.validate(content: self)
+      let payload = try self.content.decode(RefreshPayload.self)
+      return payload.refreshToken
+    }
+  }
 }

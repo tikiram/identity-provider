@@ -50,9 +50,6 @@ swift run App serve
 
 ## General ToDos
 
-- Load MongoDatabase from the start
-- Refactor Services
-- ***Improve decoupling***
 - Check Vapor docs and add tests
 - Add password reset flow
   - code generation
@@ -74,3 +71,7 @@ Key as env var
 ```
 PUBLIC_KEY=-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEO3i5iOrycaueq1KuTgK6W+LmpCeQ\nhRuWRFlixTkRETBbvvNnj/LkB40vMXl9fWn5WmmeCStla6qkZVC2bKuggg==\n-----END PUBLIC KEY-----\n
 ```
+## Start issues
+
+- check database schema
+- check env variables

@@ -3,6 +3,15 @@ import Vapor
 
 private let REFRESH_TOKEN_COOKIE_NAME = "x_rtkn"
 
+extension Request {
+  func getRefreshTokenFromCookie() throws -> String {
+    guard let refreshTokenCookie = self.cookies[REFRESH_TOKEN_COOKIE_NAME] else {
+      throw Abort(.unauthorized, reason: "MISSING_REFRESH_TOKEN")
+    }
+    return refreshTokenCookie.string
+  }
+}
+
 extension Response {
 
   func removeRefreshTokenCookie() {
@@ -46,7 +55,7 @@ extension Response {
 
 extension Response {
 
-    func handlePayload(_ clientType: ClientType, tokens: Tokens) throws {
+  func handlePayload(_ clientType: ClientType, tokens: Tokens) throws {
     switch clientType {
     case .web:
       let responseContent = LiteTokensResponse(
