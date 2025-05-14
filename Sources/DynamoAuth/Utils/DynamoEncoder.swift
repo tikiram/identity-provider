@@ -1,5 +1,6 @@
 import AWSDynamoDB
 import Foundation
+import SimpleCoder
 
 enum DynamoEncoderError: Error {
   case resultIsNotMap

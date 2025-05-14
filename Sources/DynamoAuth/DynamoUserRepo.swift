@@ -84,7 +84,7 @@ public class DynamoUserRepo: UserRepo {
       return nil
     }
 
-    return try DynamoUserEmailMethod(item)
+    return try decode(DynamoUserEmailMethod.self, item)
   }
 
   public func getUser(userId: String) async throws -> any User {

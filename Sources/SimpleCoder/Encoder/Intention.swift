@@ -27,7 +27,7 @@ class ListIntention: Intention {
     }
 }
 
-class ValueIntention: Intention {
+public class ValueIntention: Intention {
     private var value: Intention? = nil
 
     func set(_ intention: Intention) {
@@ -37,7 +37,7 @@ class ValueIntention: Intention {
         self.value = NilIntention()
     }
 
-    func result<R>(_ valueMapper: any ValueMapper<R>) throws -> R {
+    public func result<R>(_ valueMapper: any ValueMapper<R>) throws -> R {
         guard let value else {
             throw IntentionError.emptyIntention
         }

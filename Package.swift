@@ -26,9 +26,6 @@ let package = Package(
       dependencies: [
         .product(name: "Vapor", package: "vapor"),
         .product(name: "JWT", package: "jwt"),
-        // .product(name: "AWSDynamoDB", package: "aws-sdk-swift"),
-        // .product(name: "MongoKitten", package: "MongoKitten"),
-        // .product(name: "Meow", package: "MongoKitten"),
         .product(name: "Utils", package: "swift-be-utils"),
         .product(name: "VaporUtils", package: "swift-be-utils"),
         .product(name: "NIOCore", package: "swift-nio"),
@@ -53,6 +50,7 @@ let package = Package(
         "AuthCore",
         .product(name: "AWSDynamoDB", package: "aws-sdk-swift"),
         .product(name: "DynamoUtils", package: "swift-be-utils"),
+        "SimpleCoder",
       ]),
     .target(
       name: "MongoAuth",
@@ -64,6 +62,9 @@ let package = Package(
     .target(
       name: "AuthCore",
       dependencies: []
+    ),
+    .target(
+      name: "SimpleCoder"
     ),
   ],
   swiftLanguageModes: [.v5]

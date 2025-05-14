@@ -1,12 +1,28 @@
 import AWSDynamoDB
 import Foundation
+import SimpleCoder
+
+public func decode<T: Decodable>(_ type: T.Type, _ item: [String: DynamoDBClientTypes.AttributeValue]) throws
+  -> T
+{
+
+  let map: DynamoDBClientTypes.AttributeValue = .m(item)
+
+  let dynamoDecoder = SimpleDecoder(
+    codingPath: [],
+    userInfo: [:],
+    value: map,
+    inverseMapper: DynamoInverseMapper()
+  )
+  return try T(from: dynamoDecoder)
+}
 
 public struct DynamoInverseMapper: InverseMapper {
 
   public init() {}
 
-  public func mapMap(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) throws
-    -> [String: AWSDynamoDB.DynamoDBClientTypes.AttributeValue]
+  public func mapMap(_ input: DynamoDBClientTypes.AttributeValue) throws
+    -> [String: DynamoDBClientTypes.AttributeValue]
   {
     guard case .m(let map) = input else {
       throw InverseMapperError.invalidType
@@ -15,8 +31,8 @@ public struct DynamoInverseMapper: InverseMapper {
     return map
   }
 
-  public func mapList(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) throws
-    -> [AWSDynamoDB.DynamoDBClientTypes.AttributeValue]
+  public func mapList(_ input: DynamoDBClientTypes.AttributeValue) throws
+    -> [DynamoDBClientTypes.AttributeValue]
   {
     guard case .l(let list) = input else {
       throw InverseMapperError.invalidType
@@ -25,7 +41,7 @@ public struct DynamoInverseMapper: InverseMapper {
     return list
   }
 
-  public func mapInt(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) throws -> Int {
+  public func mapInt(_ input: DynamoDBClientTypes.AttributeValue) throws -> Int {
     guard case .n(let text) = input else {
       throw InverseMapperError.invalidType
     }
@@ -35,7 +51,7 @@ public struct DynamoInverseMapper: InverseMapper {
     return value
   }
 
-  public func mapInt8(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) throws -> Int8 {
+  public func mapInt8(_ input: DynamoDBClientTypes.AttributeValue) throws -> Int8 {
     guard case .n(let text) = input else {
       throw InverseMapperError.invalidType
     }
@@ -45,7 +61,7 @@ public struct DynamoInverseMapper: InverseMapper {
     return value
   }
 
-  public func mapInt16(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) throws -> Int16 {
+  public func mapInt16(_ input: DynamoDBClientTypes.AttributeValue) throws -> Int16 {
     guard case .n(let text) = input else {
       throw InverseMapperError.invalidType
     }
@@ -55,7 +71,7 @@ public struct DynamoInverseMapper: InverseMapper {
     return value
   }
 
-  public func mapInt32(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) throws -> Int32 {
+  public func mapInt32(_ input: DynamoDBClientTypes.AttributeValue) throws -> Int32 {
     guard case .n(let text) = input else {
       throw InverseMapperError.invalidType
     }
@@ -65,7 +81,7 @@ public struct DynamoInverseMapper: InverseMapper {
     return value
   }
 
-  public func mapInt64(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) throws -> Int64 {
+  public func mapInt64(_ input: DynamoDBClientTypes.AttributeValue) throws -> Int64 {
     guard case .n(let text) = input else {
       throw InverseMapperError.invalidType
     }
@@ -75,7 +91,7 @@ public struct DynamoInverseMapper: InverseMapper {
     return value
   }
 
-  public func mapUInt(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) throws -> UInt {
+  public func mapUInt(_ input: DynamoDBClientTypes.AttributeValue) throws -> UInt {
     guard case .n(let text) = input else {
       throw InverseMapperError.invalidType
     }
@@ -85,7 +101,7 @@ public struct DynamoInverseMapper: InverseMapper {
     return value
   }
 
-  public func mapUInt8(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) throws -> UInt8 {
+  public func mapUInt8(_ input: DynamoDBClientTypes.AttributeValue) throws -> UInt8 {
     guard case .n(let text) = input else {
       throw InverseMapperError.invalidType
     }
@@ -95,7 +111,7 @@ public struct DynamoInverseMapper: InverseMapper {
     return value
   }
 
-  public func mapUInt16(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) throws -> UInt16 {
+  public func mapUInt16(_ input: DynamoDBClientTypes.AttributeValue) throws -> UInt16 {
     guard case .n(let text) = input else {
       throw InverseMapperError.invalidType
     }
@@ -105,7 +121,7 @@ public struct DynamoInverseMapper: InverseMapper {
     return value
   }
 
-  public func mapUInt32(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) throws -> UInt32 {
+  public func mapUInt32(_ input: DynamoDBClientTypes.AttributeValue) throws -> UInt32 {
     guard case .n(let text) = input else {
       throw InverseMapperError.invalidType
     }
@@ -115,7 +131,7 @@ public struct DynamoInverseMapper: InverseMapper {
     return value
   }
 
-  public func mapUInt64(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) throws -> UInt64 {
+  public func mapUInt64(_ input: DynamoDBClientTypes.AttributeValue) throws -> UInt64 {
     guard case .n(let text) = input else {
       throw InverseMapperError.invalidType
     }
@@ -125,21 +141,21 @@ public struct DynamoInverseMapper: InverseMapper {
     return value
   }
 
-  public func mapString(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) throws -> String {
+  public func mapString(_ input: DynamoDBClientTypes.AttributeValue) throws -> String {
     guard case .s(let text) = input else {
       throw InverseMapperError.invalidType
     }
     return text
   }
 
-  public func mapBool(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) throws -> Bool {
+  public func mapBool(_ input: DynamoDBClientTypes.AttributeValue) throws -> Bool {
     guard case .bool(let value) = input else {
       throw InverseMapperError.invalidType
     }
     return value
   }
 
-  public func mapDouble(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) throws -> Double {
+  public func mapDouble(_ input: DynamoDBClientTypes.AttributeValue) throws -> Double {
     guard case .n(let text) = input else {
       throw InverseMapperError.invalidType
     }
@@ -149,7 +165,7 @@ public struct DynamoInverseMapper: InverseMapper {
     return value
   }
 
-  public func mapFloat(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) throws -> Float {
+  public func mapFloat(_ input: DynamoDBClientTypes.AttributeValue) throws -> Float {
     guard case .n(let text) = input else {
       throw InverseMapperError.invalidType
     }
@@ -159,7 +175,7 @@ public struct DynamoInverseMapper: InverseMapper {
     return value
   }
 
-  public func mapDate(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) throws -> Date {
+  public func mapDate(_ input: DynamoDBClientTypes.AttributeValue) throws -> Date {
     guard case .s(let text) = input else {
       throw InverseMapperError.invalidType
     }
@@ -173,7 +189,7 @@ public struct DynamoInverseMapper: InverseMapper {
     return date
   }
 
-  public func isNil(_ input: AWSDynamoDB.DynamoDBClientTypes.AttributeValue) -> Bool {
+  public func isNil(_ input: DynamoDBClientTypes.AttributeValue) -> Bool {
     if case .null(let value) = input {
       return value
     }

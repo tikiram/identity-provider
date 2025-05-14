@@ -24,7 +24,7 @@ public class DynamoPoolRepo: PoolRepo {
       return []
     }
 
-    return try items.map(DynamoPool.init)
+    return try items.map { try decode(DynamoPool.self, $0) }
   }
 
 }

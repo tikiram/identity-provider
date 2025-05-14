@@ -1,6 +1,6 @@
 import Foundation
 
-protocol ValueMapper<R> {
+public protocol ValueMapper<R> {
   associatedtype R
 
   func map(_ value: Int) -> R

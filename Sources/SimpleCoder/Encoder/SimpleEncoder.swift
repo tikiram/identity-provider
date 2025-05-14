@@ -1,11 +1,9 @@
+public struct SimpleEncoder: Encoder {
 
+    public let codingPath: [any CodingKey]
+    public let userInfo: [CodingUserInfoKey: Any]
 
-struct SimpleEncoder: Encoder {
-
-    let codingPath: [any CodingKey]
-    let userInfo: [CodingUserInfoKey: Any]
-
-    init(
+    public init(
         codingPath: [any CodingKey],
         userInfo: [CodingUserInfoKey: Any],
     ) {
@@ -13,9 +11,9 @@ struct SimpleEncoder: Encoder {
         self.userInfo = userInfo
     }
 
-    let valueIntention: ValueIntention = ValueIntention()
+    public let valueIntention: ValueIntention = ValueIntention()
 
-    func container<Key>(keyedBy type: Key.Type)
+    public func container<Key>(keyedBy type: Key.Type)
         -> KeyedEncodingContainer<Key> where Key: CodingKey
     {
         let mapIntention = MapIntention(path: codingPath)
@@ -29,7 +27,7 @@ struct SimpleEncoder: Encoder {
         return KeyedEncodingContainer(container)
     }
 
-    func unkeyedContainer() -> any UnkeyedEncodingContainer {
+    public func unkeyedContainer() -> any UnkeyedEncodingContainer {
 
         let localListIntention = ListIntention(path: codingPath)
         self.valueIntention.set(localListIntention)
@@ -40,8 +38,9 @@ struct SimpleEncoder: Encoder {
         )
     }
 
-    func singleValueContainer() -> any SingleValueEncodingContainer {
-        return SimpleSingleValueEncodingContainer(codingPath: codingPath, valueIntention: valueIntention)
+    public func singleValueContainer() -> any SingleValueEncodingContainer {
+        return SimpleSingleValueEncodingContainer(
+            codingPath: codingPath, valueIntention: valueIntention)
     }
 
 }
