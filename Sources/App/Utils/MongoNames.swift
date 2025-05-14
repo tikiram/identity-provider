@@ -1,4 +1,5 @@
 import Vapor
+import Utils
 
 struct MongoNames {
   let users: String
@@ -19,5 +20,14 @@ extension Application {
     set {
       storage[MongoNamesKey.self] = newValue
     }
+  }
+}
+
+extension Application {
+  func getMongoNames() throws -> MongoNames {
+    guard let mongoNames = self.mongoNames else {
+      throw RuntimeError("MongoNames not defined")
+    }
+    return mongoNames
   }
 }

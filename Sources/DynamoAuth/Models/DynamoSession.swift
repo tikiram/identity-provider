@@ -2,19 +2,13 @@ import AWSDynamoDB
 import DynamoUtils
 import Foundation
 
-struct DynamoSessionKey {
+struct DynamoSessionKey: Encodable {
   let userId: String  // partition key
   let id: String  // sort key
 
-  func item() -> [String: DynamoDBClientTypes.AttributeValue] {
-    return [
-      "userId": toDynamoValue(userId),
-      "id": toDynamoValue(id),
-    ]
-  }
 }
 
-struct DynamoSession {
+struct DynamoSession: Encodable {
   let userId: String  // partition key
   let id: String  // sort key
 
@@ -22,15 +16,4 @@ struct DynamoSession {
   let createdAt: Date
   let lastAccessedAt: Date
   let loggedOutAt: Date?
-
-  func item() -> [String: DynamoDBClientTypes.AttributeValue] {
-    return [
-      "userId": toDynamoValue(userId),
-      "id": toDynamoValue(id),
-      "refreshTokenHash": toDynamoValue(refreshTokenHash),
-      "createdAt": toDynamoValue(createdAt),
-      "lastAccessedAt": toDynamoValue(lastAccessedAt),
-      "loggedOutAt": toDynamoValue(loggedOutAt),
-    ]
-  }
 }

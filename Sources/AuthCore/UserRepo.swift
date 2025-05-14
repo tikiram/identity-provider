@@ -6,7 +6,7 @@ public enum UserRepoError: Error {
   case unexpectedError(String)
 }
 
-public protocol UserRepo: Sendable {
+public protocol UserRepo {
 
   func create(email: String, passwordHash: String) async throws -> User
 

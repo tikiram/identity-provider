@@ -1,0 +1,61 @@
+GET {{host}}
+Accept: application/json
+
+### Register
+
+POST {{host}}/c/v1/auth/register
+Content-Type: application/json
+x-client-type: service
+
+{
+  "email": "test10@test.com",
+  "password": "test1234"
+}
+
+> {%
+    client.global.set("access_token", response.body.access_token);
+    client.global.set("refresh_token", response.body.refresh_token);
+%}
+
+### Sign In
+
+POST {{host}}/c/v1/auth/login
+Content-Type: application/json
+x-client-type: service
+
+{
+  "email": "test6@test.com",
+  "password": "test1234"
+}
+
+> {%
+    client.global.set("access_token", response.body.access_token);
+    client.global.set("refresh_token", response.body.refresh_token);
+%}
+
+### Refresh
+
+POST {{host}}/c/v1/auth/refresh
+Content-Type: application/json
+x-client-type: service
+
+{
+  "refresh_token": "{{refresh_token}}"
+}
+
+> {%
+    client.global.set("access_token", response.body.access_token);
+    client.global.set("refresh_token", response.body.refresh_token);
+%}
+
+### logout
+
+POST {{host}}/c/v1/auth/logout
+Content-Type: application/json
+x-client-type: service
+
+{
+  "refresh_token": "{{refresh_token}}"
+}
+
+

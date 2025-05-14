@@ -1,8 +1,9 @@
 import AWSDynamoDB
 import AuthCore
 import Foundation
+import DynamoUtils
 
-public class MongoUserPoolRepo: UserPoolRepo {
+public class DynamoUserPoolRepo: UserPoolRepo {
 
   private let client: DynamoDBClient
   private let tableName: String
@@ -35,7 +36,7 @@ public class MongoUserPoolRepo: UserPoolRepo {
 
     let input = PutItemInput(
       conditionExpression: "attribute_not_exists(id)",
-      item: pool.item(),
+      item: try toDynamoItem(pool),
       tableName: self.tableName
     )
     let _ = try await client.putItem(input: input)

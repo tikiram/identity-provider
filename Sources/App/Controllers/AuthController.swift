@@ -1,6 +1,13 @@
+import AuthCore
 import Vapor
 
-struct BAuthControler: RouteCollection {
+struct AuthControler: RouteCollection, Sendable {
+
+  private let authSelector: @Sendable (_ req: Request) throws -> Auth
+
+  init(authSelector: @Sendable @escaping (_ req: Request) throws -> Auth) {
+    self.authSelector = authSelector
+  }
 
   func boot(routes: RoutesBuilder) throws {
     let auth = routes.grouped("auth")
@@ -24,7 +31,7 @@ struct BAuthControler: RouteCollection {
     try SignUpPayload.validate(content: req)
     let payload = try req.content.decode(SignUpPayload.self)
 
-    let auth = try req.bAuth()
+    let auth = try self.authSelector(req)
 
     let (user, tokens) = try await auth.register(payload.email, payload.password)
 
@@ -47,7 +54,7 @@ struct BAuthControler: RouteCollection {
     try SignInPayload.validate(content: req)
     let payload = try req.content.decode(SignInPayload.self)
 
-    let auth = try req.bAuth()
+    let auth = try self.authSelector(req)
 
     let (user, tokens) = try await auth.login(payload.email, payload.password)
 
@@ -68,7 +75,7 @@ struct BAuthControler: RouteCollection {
     try LogoutPayload.validate(content: req)
     let payload = try req.content.decode(LogoutPayload.self)
 
-    let auth = try req.bAuth()
+    let auth = try self.authSelector(req)
 
     try await auth.logout(payload.refreshToken)
 
@@ -89,7 +96,7 @@ struct BAuthControler: RouteCollection {
     try RefreshPayload.validate(content: req)
     let payload = try req.content.decode(RefreshPayload.self)
 
-    let auth = try req.bAuth()
+    let auth = try self.authSelector(req)
 
     let tokens = try await auth.refreshToken(payload.refreshToken)
 

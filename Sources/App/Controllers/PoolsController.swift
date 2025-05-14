@@ -1,8 +1,16 @@
+import AuthCore
 import Vapor
 
 struct PoolsControler: RouteCollection {
 
+  private let selector: @Sendable (_ req: Request) throws -> UserPoolService
+
+  init(selector: @Sendable @escaping (_ req: Request) throws -> UserPoolService) {
+    self.selector = selector
+  }
+
   func boot(routes: RoutesBuilder) throws {
+
     let pools = routes.grouped("pools")
     pools.post(use: create)
   }
@@ -23,7 +31,7 @@ struct PoolsControler: RouteCollection {
     try CreatePayload.validate(content: req)
     let payload = try req.content.decode(CreatePayload.self)
 
-    let userPoolService = try req.getUserPoolService()
+    let userPoolService = try self.selector(req)
 
     try await userPoolService.create(payload.kid, payload.privateKey, payload.publicKey)
 
