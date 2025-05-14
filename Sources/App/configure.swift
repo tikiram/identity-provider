@@ -1,3 +1,6 @@
+// delete
+import DynamoAuth
+// ---
 import Vapor
 import VaporUtils
 
@@ -5,7 +8,19 @@ private let MINUTE: TimeInterval = 60
 private let HOUR = 60 * MINUTE
 private let DAY = 24 * HOUR
 
+struct Hola: Decodable {
+  let name: Int
+  let age: Int?
+}
+
 public func configure(_ app: Application) async throws {
+
+  try hope()
+  // let n = "name"
+
+  // let h = try Hola(from: s)
+  // let h = try Hola(from: s)
+  // print(h)
 
   app.http.server.configuration.port = 3000
   app.middleware.use(RepoErrorMiddleware())

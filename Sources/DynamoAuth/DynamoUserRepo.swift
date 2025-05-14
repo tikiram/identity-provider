@@ -41,7 +41,7 @@ public class DynamoUserRepo: UserRepo {
 
     let put1 = DynamoDBClientTypes.Put(
       // conditionExpression: "attribute_not_exists(id)",
-      item: user.item(),
+      item: try toDynamoItem(user),
       tableName: self.userTableName
     )
     let item1 = DynamoDBClientTypes.TransactWriteItem(put: put1)
@@ -56,7 +56,7 @@ public class DynamoUserRepo: UserRepo {
 
     let put2 = DynamoDBClientTypes.Put(
       conditionExpression: "attribute_not_exists(email)",
-      item: emailMethod.item(),
+      item: try toDynamoItem(emailMethod),
       tableName: self.emailMethodTableName
     )
     let item2 = DynamoDBClientTypes.TransactWriteItem(put: put2)
@@ -74,7 +74,7 @@ public class DynamoUserRepo: UserRepo {
 
     let input = GetItemInput(
       consistentRead: false,
-      key: key.item(),
+      key: try toDynamoItem(key),
       tableName: self.emailMethodTableName
     )
 

@@ -26,7 +26,7 @@ public class DynamoSessionRepo: SessionRepo {
 
         let input = PutItemInput(
             conditionExpression: "attribute_not_exists(id)",
-            item: session.item(),
+            item: try toDynamoItem(session),
             tableName: self.tableName
         )
         let _ = try await client.putItem(input: input)
@@ -53,7 +53,7 @@ public class DynamoSessionRepo: SessionRepo {
                 conditionExpression:
                     "refreshTokenHash = :previousHash AND loggedOutAt = :nullVal",
                 expressionAttributeValues: expressionAttributeValues,
-                key: DynamoSessionKey(userId: userId, id: sessionId).item(),
+                key: try toDynamoItem(DynamoSessionKey(userId: userId, id: sessionId)),
                 tableName: self.tableName,
                 updateExpression: expression
             )
@@ -82,7 +82,7 @@ public class DynamoSessionRepo: SessionRepo {
                 conditionExpression:
                     "refreshTokenHash = :previousHash AND loggedOutAt = :nullVal",
                 expressionAttributeValues: expressionAttributeValues,
-                key: DynamoSessionKey(userId: userId, id: sessionId).item(),
+                key: try toDynamoItem(DynamoSessionKey(userId: userId, id: sessionId)),
                 tableName: self.tableName,
                 updateExpression: expression
             )

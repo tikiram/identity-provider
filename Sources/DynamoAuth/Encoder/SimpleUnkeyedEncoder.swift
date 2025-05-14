@@ -1,3 +1,5 @@
+import Foundation
+
 struct SimpleUnkeyedEncodingContainer: UnkeyedEncodingContainer {
   let codingPath: [any CodingKey]
   let listIntention: ListIntention
@@ -67,7 +69,14 @@ struct SimpleUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     listIntention.addNil()
   }
   mutating func encode<T>(_ value: T) throws where T: Encodable {
-    let encoder = SimpleEncoder(codingPath: codingPath + [nextIndexedKey()], userInfo: [:])
+    let path = codingPath + [nextIndexedKey()]
+
+    if let date = value as? Date {
+      listIntention.add(date)
+      return
+    }
+
+    let encoder = SimpleEncoder(codingPath: path, userInfo: [:])
     try value.encode(to: encoder)
     listIntention.add(encoder.valueIntention)
   }
@@ -109,7 +118,7 @@ struct SimpleUnkeyedEncodingContainer: UnkeyedEncodingContainer {
     // return OGEncoder<R>(codingPath: [nextIndexedKey()], userInfo: [:])
   }
 
-  // ?
+  // --------------------------------------------------
 
   private mutating func nextIndexedKey() -> CodingKey {
     let nextCodingKey = IndexedCodingKey(intValue: count)!

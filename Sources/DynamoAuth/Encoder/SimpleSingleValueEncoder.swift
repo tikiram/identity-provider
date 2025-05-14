@@ -1,3 +1,5 @@
+import Foundation
+
 struct SimpleSingleValueEncodingContainer: SingleValueEncodingContainer {
 
   let codingPath: [any CodingKey]
@@ -66,6 +68,11 @@ struct SimpleSingleValueEncodingContainer: SingleValueEncodingContainer {
   }
 
   mutating func encode<T>(_ value: T) throws where T: Encodable {
+    if let date = value as? Date {
+      valueIntention.set(date)
+      return
+    }
+
     let encoder = SimpleEncoder(codingPath: codingPath, userInfo: [:])
     try value.encode(to: encoder)
     valueIntention.set(encoder.valueIntention)

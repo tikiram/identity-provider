@@ -1,3 +1,5 @@
+import Foundation
+
 protocol ValueMapper<R> {
   associatedtype R
 
@@ -17,6 +19,7 @@ protocol ValueMapper<R> {
   func map(_ value: Float) -> R
   func map(_ value: [R]) -> R
   func map(_ value: [String: R]) -> R
+  func map(_ value: Date) -> R
   func mapNil() -> R
 
 }

@@ -35,7 +35,7 @@ public class DynamoUserPoolRepo: UserPoolRepo {
 
     let input = PutItemInput(
       conditionExpression: "attribute_not_exists(id)",
-      item: pool.item(),
+      item: try toDynamoItem(pool),
       tableName: self.tableName
     )
     let _ = try await client.putItem(input: input)

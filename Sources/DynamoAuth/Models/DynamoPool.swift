@@ -3,7 +3,7 @@ import AuthCore
 import DynamoUtils
 import Foundation
 
-struct DynamoPool: Pool {
+struct DynamoPool: Pool, Encodable {
   let createdBy: String  // partition key
   let id: String  // sort key
 
@@ -31,16 +31,5 @@ struct DynamoPool: Pool {
     self.encryptedPrivateKey = try extractString(attributes["encryptedPrivateKey"])
     self.encryptedPublicKey = try extractString(attributes["encryptedPublicKey"])
     self.createdAt = try extractDate(attributes["createdAt"])
-  }
-
-  func item() -> [String: DynamoDBClientTypes.AttributeValue] {
-    let item: [String: DynamoDBClientTypes.AttributeValue] = [
-      "id": toDynamoValue(id),
-      "createdBy": toDynamoValue(createdBy),
-      "encryptedPrivateKey": toDynamoValue(encryptedPrivateKey),
-      "encryptedPublicKey": toDynamoValue(encryptedPublicKey),
-      "createdAt": toDynamoValue(createdAt),
-    ]
-    return item
   }
 }

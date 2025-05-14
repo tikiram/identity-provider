@@ -3,19 +3,12 @@ import AuthCore
 import DynamoUtils
 import Foundation
 
-struct DynamoUserEmailMethodKey {
+struct DynamoUserEmailMethodKey: Encodable {
   let poolId: String  // partition key
   let email: String  // sort key
-
-  func item() -> [String: DynamoDBClientTypes.AttributeValue] {
-    return [
-      "poolId": toDynamoValue(poolId),
-      "email": toDynamoValue(email),
-    ]
-  }
 }
 
-struct DynamoUserEmailMethod: UserEmailMethod {
+struct DynamoUserEmailMethod: UserEmailMethod, Encodable {
   let poolId: String  // partition key
   let email: String  // sort key
 
@@ -39,13 +32,4 @@ struct DynamoUserEmailMethod: UserEmailMethod {
     self.createdAt = try extractDate(attributes["createdAt"])
   }
 
-  func item() -> [String: DynamoDBClientTypes.AttributeValue] {
-    return [
-      "poolId": toDynamoValue(poolId),
-      "email": toDynamoValue(email),
-      "passwordHash": toDynamoValue(passwordHash),
-      "userId": toDynamoValue(userId),
-      "createdAt": toDynamoValue(createdAt),
-    ]
-  }
 }

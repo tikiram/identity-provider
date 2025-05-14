@@ -1,3 +1,5 @@
+import Foundation
+
 struct SimpleKeyedEncodingContainer<Key: CodingKey>: KeyedEncodingContainerProtocol {
 
   let codingPath: [any CodingKey]
@@ -51,6 +53,11 @@ struct SimpleKeyedEncodingContainer<Key: CodingKey>: KeyedEncodingContainerProto
     mapIntention.set(key, value)
   }
   mutating func encode<T>(_ value: T, forKey key: Key) throws where T: Encodable {
+    if let date = value as? Date {
+      mapIntention.set(key, date)
+      return
+    }
+
     let encoder = SimpleEncoder(
       codingPath: codingPath + [key],
       userInfo: [:]

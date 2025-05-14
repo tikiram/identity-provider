@@ -1,3 +1,5 @@
+import Foundation
+
 extension UInt64: Intention {
   func result<R>(_ valueMapper: any ValueMapper<R>) throws -> R {
     return valueMapper.map(self)
@@ -72,6 +74,12 @@ extension Double: Intention {
 }
 
 extension Float: Intention {
+  func result<R>(_ valueMapper: any ValueMapper<R>) throws -> R {
+    return valueMapper.map(self)
+  }
+}
+
+extension Date: Intention {
   func result<R>(_ valueMapper: any ValueMapper<R>) throws -> R {
     return valueMapper.map(self)
   }

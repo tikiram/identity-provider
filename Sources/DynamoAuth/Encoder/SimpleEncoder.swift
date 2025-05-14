@@ -1,6 +1,6 @@
 
 
-class SimpleEncoder: Encoder {
+struct SimpleEncoder: Encoder {
 
     let codingPath: [any CodingKey]
     let userInfo: [CodingUserInfoKey: Any]
