@@ -1,5 +1,5 @@
 {
-  "originHash" : "60ca70597d4f84c32eb2beb50f63d3fa457e9e6f81dfc1a0fe17ccc3569b5d2c",
+  "originHash" : "35f25793d053de8dc22d9b79bde8f33ce9817391ba7e1f82bcbb9854edf481e6",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -150,8 +150,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tikiram/swift-be-utils.git",
       "state" : {
-        "revision" : "1330e65773699493fbd71aef600d3aceae9c4fb1",
-        "version" : "0.14.0"
+        "revision" : "8a44c105cc045399e7897795620941ccb062ad1e",
+        "version" : "0.15.0"
       }
     },
     {

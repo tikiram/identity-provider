@@ -1,5 +1,6 @@
 import AWSDynamoDB
 import AuthCore
+import DynamoUtils
 
 public class DynamoPoolRepo: PoolRepo {
 

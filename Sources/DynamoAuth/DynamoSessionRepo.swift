@@ -21,7 +21,7 @@ public class DynamoSessionRepo: SessionRepo {
             refreshTokenHash: refreshTokenHash,
             createdAt: Date(),
             lastAccessedAt: Date(),
-            loggedOutAt: Date()
+            loggedOutAt: nil
         )
 
         let input = PutItemInput(
@@ -38,20 +38,17 @@ public class DynamoSessionRepo: SessionRepo {
         newRefreshTokenHash: String,
         previousRefreshTokenHash: String
     ) async throws {
-
         do {
-
             let expression = "SET refreshTokenHash = :x, lastAccessedAt = :y"
             let expressionAttributeValues: [String: DynamoDBClientTypes.AttributeValue] = [
                 ":x": toDynamoValue(newRefreshTokenHash),
                 ":y": toDynamoValue(Date()),
                 ":previousHash": toDynamoValue(previousRefreshTokenHash),
-                ":nullVal": .null(true),
             ]
 
             let input = UpdateItemInput(
                 conditionExpression:
-                    "refreshTokenHash = :previousHash AND loggedOutAt = :nullVal",
+                    "refreshTokenHash = :previousHash AND attribute_not_exists(loggedOutAt)",
                 expressionAttributeValues: expressionAttributeValues,
                 key: try toDynamoItem(DynamoSessionKey(userId: userId, id: sessionId)),
                 tableName: self.tableName,
@@ -75,12 +72,11 @@ public class DynamoSessionRepo: SessionRepo {
             let expressionAttributeValues: [String: DynamoDBClientTypes.AttributeValue] = [
                 ":previousHash": toDynamoValue(refreshTokenHash),
                 ":x": toDynamoValue(Date()),
-                ":nullVal": .null(true),
             ]
 
             let input = UpdateItemInput(
                 conditionExpression:
-                    "refreshTokenHash = :previousHash AND loggedOutAt = :nullVal",
+                    "refreshTokenHash = :previousHash AND attribute_not_exists(loggedOutAt)",
                 expressionAttributeValues: expressionAttributeValues,
                 key: try toDynamoItem(DynamoSessionKey(userId: userId, id: sessionId)),
                 tableName: self.tableName,

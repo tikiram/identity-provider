@@ -54,7 +54,7 @@ struct AuthControler: RouteCollection, Sendable {
     try SignInPayload.validate(content: req)
     let payload = try req.content.decode(SignInPayload.self)
 
-    let auth = try req.bAuth()
+    let auth = try self.authSelector(req)
 
     let (user, tokens) = try await auth.login(payload.email, payload.password)
 
@@ -75,7 +75,7 @@ struct AuthControler: RouteCollection, Sendable {
     try LogoutPayload.validate(content: req)
     let payload = try req.content.decode(LogoutPayload.self)
 
-    let auth = try req.bAuth()
+    let auth = try self.authSelector(req)
 
     try await auth.logout(payload.refreshToken)
 
@@ -96,7 +96,7 @@ struct AuthControler: RouteCollection, Sendable {
     try RefreshPayload.validate(content: req)
     let payload = try req.content.decode(RefreshPayload.self)
 
-    let auth = try req.bAuth()
+    let auth = try self.authSelector(req)
 
     let tokens = try await auth.refreshToken(payload.refreshToken)
 

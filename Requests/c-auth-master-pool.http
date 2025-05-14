@@ -8,7 +8,7 @@ Content-Type: application/json
 x-client-type: service
 
 {
-  "email": "test3@test.com",
+  "email": "test10@test.com",
   "password": "test1234"
 }
 
@@ -24,7 +24,7 @@ Content-Type: application/json
 x-client-type: service
 
 {
-  "email": "test@test.com",
+  "email": "test6@test.com",
   "password": "test1234"
 }
 

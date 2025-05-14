@@ -1,6 +1,7 @@
 import AWSDynamoDB
 import AuthCore
 import Foundation
+import DynamoUtils
 
 public class DynamoUserPoolRepo: UserPoolRepo {
 

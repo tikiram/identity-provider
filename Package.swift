@@ -18,7 +18,7 @@ let package = Package(
     // MongoDB
     .package(url: "https://github.com/orlandos-nl/MongoKitten.git", from: "7.9.9"),
     // Shared
-    .package(url: "https://github.com/tikiram/swift-be-utils.git", from: "0.14.0"),
+    .package(url: "https://github.com/tikiram/swift-be-utils.git", from: "0.15.0"),
   ],
   targets: [
     .executableTarget(
@@ -50,7 +50,6 @@ let package = Package(
         "AuthCore",
         .product(name: "AWSDynamoDB", package: "aws-sdk-swift"),
         .product(name: "DynamoUtils", package: "swift-be-utils"),
-        "SimpleCoder",
       ]),
     .target(
       name: "MongoAuth",
@@ -62,9 +61,6 @@ let package = Package(
     .target(
       name: "AuthCore",
       dependencies: []
-    ),
-    .target(
-      name: "SimpleCoder"
     ),
   ],
   swiftLanguageModes: [.v5]
