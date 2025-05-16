@@ -1,5 +1,4 @@
 @preconcurrency import AWSDynamoDB
-import MongoKitten
 import Vapor
 
 private struct DynamoStorageKey: StorageKey {

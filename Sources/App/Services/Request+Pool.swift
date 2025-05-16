@@ -35,7 +35,7 @@ extension Request {
 
   func getCUserPoolService() throws -> UserPoolService {
     let session = try self.getSession()
-    return try self.getMongoUserPoolService(userId: session.userId)
+    return try self.getDynamoUserPoolService(userId: session.userId)
   }
 
 }
