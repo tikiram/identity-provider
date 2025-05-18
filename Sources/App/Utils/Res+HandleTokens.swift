@@ -6,7 +6,7 @@ private let REFRESH_TOKEN_COOKIE_NAME = "x_rtkn"
 extension Request {
   func getRefreshTokenFromCookie() throws -> String {
     guard let refreshTokenCookie = self.cookies[REFRESH_TOKEN_COOKIE_NAME] else {
-      throw Abort(.unauthorized, reason: "MISSING_REFRESH_TOKEN")
+      throw Abort(.badRequest, reason: "MISSING_REFRESH_TOKEN")
     }
     return refreshTokenCookie.string
   }
